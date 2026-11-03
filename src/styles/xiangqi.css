@@ -1,0 +1,536 @@
+/* ================= Cờ tướng ================= */
+:root {
+  --xq-bg: #ecc98a;
+  --xq-bg-2: #e2b871;
+  --xq-line: #6b3d14;
+  --xq-river: rgba(107, 61, 20, 0.55);
+  --xq-disc: #fbf2dc;
+  --xq-disc-2: #ead3a2;
+  --xq-red: #b3261e;
+  --xq-black: #1f1b17;
+  --xq-num-red: #b3261e;
+  --xq-num-black: #4a3a2a;
+  /* tỉ lệ cao / rộng của bàn cờ có hàng số (9 × 10,84) */
+  --xq-ratio: 1.2044;
+}
+:root[data-board='green'] {
+  --xq-bg: #d9e4c0;
+  --xq-bg-2: #c9d8a8;
+  --xq-line: #3e5a2a;
+  --xq-river: rgba(62, 90, 42, 0.55);
+}
+:root[data-board='blue'] {
+  --xq-bg: #d7e2ea;
+  --xq-bg-2: #c4d3de;
+  --xq-line: #2f4a5f;
+  --xq-river: rgba(47, 74, 95, 0.55);
+}
+:root[data-theme='dark'] {
+  --xq-num-red: #ff7b72;
+  --xq-num-black: #c9bba6;
+}
+
+.xq-board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 10;
+  container-type: inline-size;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  isolation: isolate;
+  border-radius: 8px;
+  background: var(--xq-bg);
+  box-shadow: 0 6px 24px rgba(40, 25, 5, 0.28), inset 0 0 0 1px rgba(80, 45, 10, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+.xq-board.with-coords {
+  aspect-ratio: 9 / 10.84;
+}
+.xq-board.interactive {
+  cursor: pointer;
+}
+.xq-nums {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  height: calc(100% * 0.42 / 10.84);
+  align-items: center;
+  font-size: 2.5cqw;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.xq-nums.red {
+  color: var(--xq-num-red);
+}
+.xq-nums.black {
+  color: var(--xq-num-black);
+}
+:root[data-theme='dark'] .xq-nums.black {
+  color: #4a3a2a;
+}
+.xq-field {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 10;
+  flex: none;
+}
+.xq-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.xq-frame {
+  fill: none;
+  stroke: var(--xq-line);
+  stroke-width: 0.6;
+}
+.xq-lines {
+  fill: none;
+  stroke: var(--xq-line);
+  stroke-width: 0.32;
+}
+.xq-marks-lines {
+  fill: none;
+  stroke: var(--xq-line);
+  stroke-width: 0.3;
+}
+.xq-river text {
+  fill: var(--xq-river);
+  font-size: 4.6px;
+  font-family: 'KaiTi', 'STKaiti', 'Kaiti SC', 'BiauKai', 'DFKai-SB', 'Noto Serif SC', 'Noto Serif TC', 'Songti SC', serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.xq-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.xq-layer.pieces {
+  z-index: 2;
+}
+.xq-layer.targets {
+  z-index: 3;
+}
+.xq-mark,
+.xq-target,
+.xq-piece {
+  position: absolute;
+  width: 11.1111%;
+  height: 10%;
+}
+.xq-mark::after {
+  content: '';
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+}
+.xq-mark.last::after {
+  inset: 2%;
+  border-radius: 18%;
+  background: rgba(70, 140, 255, 0.22);
+  box-shadow: inset 0 0 0 2px rgba(40, 110, 230, 0.55);
+}
+.xq-mark.selected::after {
+  background: rgba(20, 120, 40, 0.38);
+  box-shadow: 0 0 0 3px rgba(20, 120, 40, 0.6);
+}
+/* tô điểm: vầng màu quanh quân (quân che phần giữa) và chấm màu ở giao điểm trống */
+.xq-mark[class*='hl-']::after {
+  inset: -7%;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, var(--hl) 0 26%, transparent 27% 77%, var(--hl) 78% 97%, transparent 100%);
+}
+.xq-mark.hl-yellow {
+  --hl: rgba(240, 180, 0, 0.85);
+}
+.xq-mark.hl-green {
+  --hl: rgba(30, 150, 60, 0.8);
+}
+.xq-mark.hl-red {
+  --hl: rgba(215, 30, 30, 0.8);
+}
+.xq-mark.hl-blue {
+  --hl: rgba(30, 100, 220, 0.8);
+}
+.xq-mark.check::after {
+  inset: -8%;
+  background: radial-gradient(circle, rgba(255, 0, 0, 0.85) 0%, rgba(231, 0, 0, 0.5) 40%, rgba(169, 0, 0, 0) 72%);
+}
+.xq-piece {
+  display: grid;
+  place-items: center;
+  will-change: transform;
+}
+.xq-piece .disc,
+.xq-fig .disc {
+  position: relative;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, #fffdf6 0%, var(--xq-disc) 45%, var(--xq-disc-2) 100%);
+  box-shadow: 0 0.35cqw 0.6cqw rgba(30, 15, 0, 0.45), inset 0 -0.4cqw 0 rgba(120, 80, 30, 0.35);
+  border: 0.25cqw solid rgba(110, 70, 25, 0.75);
+}
+.xq-piece .disc::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 0.28cqw solid currentColor;
+  opacity: 0.7;
+}
+.xq-piece.red,
+.xq-fig.red {
+  color: var(--xq-red);
+}
+.xq-piece.black,
+.xq-fig.black {
+  color: var(--xq-black);
+}
+.xq-piece .han,
+.xq-fig .han {
+  font-family: 'KaiTi', 'STKaiti', 'Kaiti SC', 'BiauKai', 'DFKai-SB', 'Noto Serif SC', 'Noto Serif TC', 'Songti SC', 'SimSun', serif;
+  font-size: 6cqw;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: -0.2cqw;
+}
+.xq-piece .vi,
+.xq-fig .vi {
+  display: none;
+  font-size: 2.35cqw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+:root[data-xqpieces='viet'] .xq-piece .han {
+  display: none;
+}
+:root[data-xqpieces='viet'] .xq-piece .vi {
+  display: block;
+}
+.xq-piece.dragging {
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.35));
+}
+.xq-target::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: rgba(20, 105, 40, 0.55);
+}
+.xq-target.capture::after {
+  width: 96%;
+  height: 96%;
+  background: none;
+  box-shadow: 0 0 0 0.6cqw rgba(20, 105, 40, 0.7);
+}
+.xq-arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+.xq-badge {
+  width: 5.4%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+/* bàn cờ thu nhỏ trong danh sách */
+.xq-board.mini {
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(40, 25, 5, 0.22);
+}
+.xq-board.mini .xq-lines {
+  stroke-width: 0.5;
+}
+.xq-board.mini .xq-frame {
+  stroke-width: 0.8;
+}
+.xq-board.mini .xq-piece .disc {
+  width: 92%;
+  border-width: 0.4cqw;
+  box-shadow: 0 0.4cqw 0.6cqw rgba(30, 15, 0, 0.35);
+}
+.xq-board.mini .xq-piece .disc::before {
+  display: none;
+}
+.xq-board.mini .xq-piece .han {
+  font-size: 6.6cqw;
+}
+:root[data-xqpieces='viet'] .xq-board.mini .xq-piece .vi {
+  font-size: 2.4cqw;
+}
+
+/* hình quân trong ký hiệu nước đi */
+.xq-san {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.xq-fig {
+  display: inline-grid;
+  width: 1.3em;
+  height: 1.3em;
+  container-type: inline-size;
+  margin-right: 2px;
+  vertical-align: -0.28em;
+}
+.xq-fig .disc {
+  width: 100%;
+  border-width: 1px;
+  box-shadow: 0 1px 1px rgba(30, 15, 0, 0.35);
+}
+.xq-fig .han {
+  font-size: 66cqw;
+  margin-top: 0;
+}
+.xq-letter {
+  display: none;
+  font-weight: 700;
+}
+.xq-san.red .xq-letter {
+  color: var(--xq-red);
+}
+:root[data-theme='dark'] .xq-san.red .xq-letter {
+  color: var(--xq-num-red);
+}
+:root[data-xqpieces='viet'] .xq-fig {
+  display: none;
+}
+:root[data-xqpieces='viet'] .xq-letter {
+  display: inline;
+}
+
+/* ---------- Bố cục: bàn cờ tướng cao hơn bàn cờ vua ---------- */
+.stage.xq {
+  /* phần tiêu đề ván cờ tướng (kỳ thủ, giải đấu, chủ đề) thường cao hơn – chừa thêm chỗ để bàn cờ không lọt khỏi màn hình */
+  --stage-size: clamp(280px, calc(100vh - 265px), 640px);
+  --stage-size: clamp(280px, calc(100svh - 265px), 640px);
+  grid-template-columns: minmax(0, calc(var(--stage-size) / var(--xq-ratio))) minmax(320px, 1fr);
+}
+.board-fit.xq {
+  width: min(100%, max(240px, calc((100vh - var(--reserve)) / var(--xq-ratio))));
+  width: min(100%, max(240px, calc((100svh - var(--reserve)) / var(--xq-ratio))));
+}
+.play-board-col.xq {
+  max-width: max(320px, min(620px, calc((100vh - 250px) / var(--xq-ratio))));
+}
+
+.study.xq {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, min(440px, calc((100vh - 250px) / var(--xq-ratio))));
+}
+@media (max-width: 900px) {
+  .stage.xq {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stage.xq .stage-board {
+    width: min(100%, max(240px, calc((100vh - var(--guide-h) - 250px) / var(--xq-ratio))));
+    width: min(100%, max(240px, calc((100svh - var(--guide-h) - 250px) / var(--xq-ratio))));
+  }
+}
+@media (max-width: 1100px) {
+  .study.xq {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.game-card .gc-board .xq-board,
+.puzzle-card .xq-board {
+  align-self: start;
+}
+
+/* ---------- Chế độ cờ tướng: màu của Đỏ trên thanh tỉ lệ thắng ---------- */
+.xq-mode .winbar-fill {
+  background: #c9372c;
+}
+.xq-mode .winbar-track {
+  background: #2b2724;
+}
+.xq-mode .evalbar-white {
+  background: #c9372c;
+}
+.xq-mode .evalbar-text.for-white {
+  color: #fff;
+}
+.xq-mode .logo-mark {
+  background: var(--surface-4);
+}
+
+/* ---------- Chọn môn cờ ---------- */
+.game-switch {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.game-switch a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 9999px;
+  color: var(--text-2);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.game-switch a {
+  transition: color 300ms var(--ease);
+}
+.game-switch a:hover {
+  color: var(--text);
+}
+.game-switch a.active {
+  background: var(--surface-4);
+  color: var(--text);
+}
+.game-switch .gs-ic {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 20px;
+}
+.game-switch .gs-ic img {
+  width: 22px;
+  height: 22px;
+}
+.game-switch .gs-ic.xq {
+  background: radial-gradient(circle at 35% 30%, #fffdf6, #ead3a2);
+  border: 1.5px solid #8b5a24;
+  color: #b3261e;
+  font-family: 'KaiTi', 'STKaiti', 'Kaiti SC', 'Noto Serif SC', 'Songti SC', serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+}
+.logo-mark .xq-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, #fffdf6, #ead3a2);
+  color: #b3261e;
+  font-family: 'KaiTi', 'STKaiti', 'Kaiti SC', 'Noto Serif SC', 'Songti SC', serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  border: 1.5px solid #8b5a24;
+}
+.piece-chip {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  container-type: inline-size;
+}
+.piece-chip .xq-fig,
+.choice .xq-fig,
+.pc-task .xq-fig,
+.puzzle-task .xq-fig {
+  display: inline-grid !important;
+}
+.choice .xq-fig {
+  width: 34px;
+  height: 34px;
+  font-size: 30px;
+  line-height: 36px;
+}
+.pc-task .xq-fig {
+  width: 18px;
+  height: 18px;
+}
+.puzzle-task .xq-fig {
+  width: 34px;
+  height: 34px;
+}
+.captured .xq-fig {
+  display: inline-grid !important;
+  width: 20px;
+  height: 20px;
+  margin-left: -4px;
+}
+
+/* thanh tiêu đề có thêm nút chọn môn cờ: rút gọn dần các phần phụ để menu không bị cắt */
+@media (max-width: 1500px) {
+  .logo small {
+    display: none;
+  }
+}
+@media (max-width: 1400px) {
+  .nav-ic {
+    display: none;
+  }
+}
+@media (max-width: 1200px) {
+  .game-switch .gs-label {
+    display: none;
+  }
+  .game-switch a {
+    padding: 4px;
+  }
+  .nav a {
+    padding: 8px 8px;
+  }
+}
+.xq-fig .vi {
+  font-size: 30cqw;
+}
+:root[data-xqpieces='viet'] .xq-fig .han {
+  display: none;
+}
+:root[data-xqpieces='viet'] .xq-fig .vi {
+  display: block;
+}
+.side-chip.xr::before {
+  background: #c0392b;
+  border-radius: 50%;
+}
+.side-chip.xb::before {
+  background: #222;
+  border-radius: 50%;
+}
+/* điện thoại: logo, nút chọn môn cờ và các nút thao tác cùng một hàng, menu ở hàng dưới */
+@media (max-width: 640px) {
+  .logo > span:not(.logo-mark) {
+    display: none;
+  }
+  .top-actions {
+    gap: 4px;
+  }
+  .top-actions .icon-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+/* Cột bàn cờ dính (bài học): không cao hơn màn hình, để cuối bài ngắn không đẩy bàn cờ lên dưới thanh tiêu đề;
+   mục lục bên dưới cuộn được trong cột. */
+@media (min-width: 1101px) {
+  .study.xq .sticky-board {
+    max-height: calc(100vh - 86px);
+    max-height: calc(100svh - 86px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}

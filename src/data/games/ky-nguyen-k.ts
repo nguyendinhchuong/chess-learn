@@ -1,0 +1,721 @@
+// Kỷ nguyên Fischer – Karpov – Kasparov (1970 – 1999).
+// Biên bản mỗi ván đã được đối chiếu từng nước với hai nguồn độc lập (chessgames.com cùng Wikipedia,
+// chess.com hoặc lichess.org); đường dẫn trong `source` là nguồn chính.
+import type { ClassicGame } from '../types';
+
+export const GAMES_KY_NGUYEN_K: ClassicGame[] = [
+  // ------------------------------------------------------------------ 1970
+  {
+    id: 'larsen-spassky-1970',
+    title: 'Larsen – Spassky (1970): Đòn sấm sét ở Belgrade',
+    white: 'Bent Larsen',
+    black: 'Boris Spassky',
+    event: 'Trận đấu Liên Xô – Phần còn lại của thế giới, Belgrade (bàn 1, ván 2)',
+    year: 1970,
+    result: '0-1',
+    opening: 'Khai cuộc Nimzowitsch – Larsen (Nimzo-Larsen Attack, 1.b3)',
+    difficulty: 3,
+    context:
+      'Năm 1970, Belgrade tổ chức trận đấu lịch sử giữa đội tuyển Liên Xô và đội tuyển phần còn lại của thế giới. Bent Larsen (Đan Mạch) đang có phong độ cao nên đòi được ngồi bàn 1, và Bobby Fischer đồng ý lùi xuống bàn 2. Đối thủ của Larsen ở bàn 1 là nhà vô địch thế giới Boris Spassky; cuối cùng đội Liên Xô chỉ thắng sát nút 20,5–19,5.',
+    summary:
+      'Larsen mở đầu bằng 1.b3 quen thuộc nhưng phát triển quá chậm, trong khi Spassky đưa quân ra nhanh và nhập thành dài. Khi Trắng làm yếu cánh Vua bằng f4 và g3 lúc Vua còn ở e1, Spassky tung ra chuỗi thí quân: bỏ mặc Mã g4 để mở cột h, rồi thí Xe 14...Rh1!! để tốt g lao xuống hàng 1. Larsen đầu hàng chỉ sau 17 nước.',
+    moves: '1.b3 e5 2.Bb2 Nc6 3.c4 Nf6 4.Nf3 e4 5.Nd4 Bc5 6.Nxc6 dxc6 7.e3 Bf5 8.Qc2 Qe7 9.Be2 O-O-O 10.f4 Ng4 11.g3 h5 12.h3 h4 13.hxg4 hxg3 14.Rg1 Rh1 15.Rxh1 g2 16.Rf1 Qh4+ 17.Kd1 gxf1=Q+',
+    annotations: {
+      '1': 'Khai cuộc yêu thích của Larsen: Tượng lên đường chéo dài a1–h8, nhường trung tâm cho Đen rồi mới tìm cách phản công.',
+      '1...': 'Đen chiếm ngay trung tâm bằng tốt e5 – câu trả lời tự nhiên và mạnh mẽ.',
+      '4...': 'Tốt e4 đuổi Mã f3 và giành thêm không gian. Từ đây, tốt e4 như một chốt chặn chia cắt thế trận Trắng.',
+      '6...':
+        'Ăn lại bằng tốt d, tức là bắt quân ra phía ngoài – nhưng nước đi này mở cột d cho Xe và mở đường cho Tượng c8. Phát triển nhanh quan trọng hơn hình thức của các tốt.',
+      '9...': 'Nhập thành dài: Vua đen an toàn ở c8, còn Xe đứng ngay trên cột d mở.',
+      '10':
+        'Sai lầm chiến lược: Vua trắng còn ở e1 mà tốt f lại rời f2, mở đường chéo e1–h4 và làm yếu các ô g3, g4. Spassky lập tức khai thác.',
+      '10...': 'Mã nhảy vào g4, nhắm vào ô e3 và h2. Các quân đen đã sẵn sàng đánh vào cánh Vua.',
+      '11...': 'Tốt h lao lên phía trước: Đen muốn mở cột h cho Xe h8 mà không cần di chuyển Xe.',
+      '12...':
+        'Thí Mã! Spassky mặc kệ Mã g4 bị tấn công và đẩy tiếp tốt h. Nếu Trắng ăn Mã, cột h sẽ mở toang ngay trước Vua trắng.',
+      '13...':
+        'Tốt h ăn sang g3. Giờ Xe h8 đối mặt Xe h1 trên cột h đã mở, còn tốt g3 chỉ còn cách ô phong cấp hai bước.',
+      '14': 'Xe tránh cuộc đổi Xe và đứng chắn ô g1 trước tốt g.',
+      '14...':
+        'Đòn thí Xe ngoạn mục! Sau 15.Rxh1, tốt g tiến lên g2, vừa tấn công Xe h1 vừa đe dọa phong cấp. Xe g1 bị kéo khỏi vị trí chặn tốt.',
+      '16':
+        'Nếu 16.Rg1, Đen thắng bằng 16...Qh4+ 17.Kd1 Qh1. Larsen lùi Xe về f1, nhưng Xe vẫn nằm trong tầm ăn của tốt g2.',
+      '16...': 'Hậu chiếu theo đường chéo e1–h4 – hậu quả trực tiếp của nước 10.f4.',
+      '17...':
+        'Tốt ăn Xe f1 và phong Hậu kèm chiếu. Sau 18.Bxf1 Bxg4+ Trắng bị chiếu hết: 19.Be2 Qh1# hoặc 19.Kc1 Qe1+ 20.Qd1 Qxd1#. Larsen đầu hàng.',
+    },
+    keyMoments: ['10', '12...', '14...', '17...'],
+    lessons: [
+      'Khi Vua còn ở trung tâm, đừng đẩy tốt f và g làm hở hàng rào phòng thủ.',
+      'Phát triển quân nhanh và mở cột cho Xe thường quan trọng hơn giữ cấu trúc tốt đẹp.',
+      'Thí quân để mở cột trước Vua đối phương rất đáng giá khi các quân của ta đã sẵn sàng tham chiến.',
+      'Một quân tốt tiến sâu, được các đòn thí mở đường, có thể nguy hiểm như một quân Hậu.',
+    ],
+    orientation: 'black',
+    tags: ['Tấn công Vua', 'Thí quân', 'Ván ngắn'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1128831',
+  },
+
+  // ------------------------------------------------------------------ 1971
+  {
+    id: 'fischer-petrosian-1971-van-7',
+    title: 'Fischer – Petrosian, ván 7 (1971): Tượng mạnh chống Mã',
+    white: 'Robert James Fischer',
+    black: 'Tigran Petrosian',
+    event: 'Chung kết các ứng viên, Buenos Aires',
+    year: 1971,
+    result: '1-0',
+    opening: 'Phòng thủ Sicilia – biến Kan (Sicilian Defence, Kan Variation)',
+    difficulty: 4,
+    context:
+      'Trên đường tới trận tranh ngôi với Spassky, Fischer thắng cả Taimanov lẫn Larsen với cùng tỷ số 6–0 – thành tích chưa từng có ở vòng ứng viên. Ở trận chung kết, cựu vô địch thế giới Tigran Petrosian chặn đứng chuỗi thắng của Fischer, và sau năm ván tỷ số là 2,5–2,5. Ván 7 nằm trong chuỗi bốn ván thắng liên tiếp giúp Fischer kết thúc trận đấu với tỷ số 6,5–2,5.',
+    summary:
+      'Fischer chọn một lối chơi yên tĩnh: phá trung tâm Đen, đổi Hậu sớm rồi khai thác những điểm yếu nhỏ – tốt d5 cô lập và tốt a6. Bước ngoặt là 22.Nxd7+!, khi Fischer chủ động đổi con Mã đang đứng ở tiền đồn c5 lấy Tượng đen, để lại thế Tượng đấu Mã có lợi cho Trắng. Hai Xe trắng xâm nhập hàng 7, Vua trắng tiến ra trung tâm, và thế trận Đen sụp đổ ở nước 34.',
+    moves: '1.e4 c5 2.Nf3 e6 3.d4 cxd4 4.Nxd4 a6 5.Bd3 Nc6 6.Nxc6 bxc6 7.O-O d5 8.c4 Nf6 9.cxd5 cxd5 10.exd5 exd5 11.Nc3 Be7 12.Qa4+ Qd7 13.Re1 Qxa4 14.Nxa4 Be6 15.Be3 O-O 16.Bc5 Rfe8 17.Bxe7 Rxe7 18.b4 Kf8 19.Nc5 Bc8 20.f3 Rea7 21.Re5 Bd7 22.Nxd7+ Rxd7 23.Rc1 Rd6 24.Rc7 Nd7 25.Re2 g6 26.Kf2 h5 27.f4 h4 28.Kf3 f5 29.Ke3 d4+ 30.Kd2 Nb6 31.Ree7 Nd5 32.Rf7+ Ke8 33.Rb7 Nxf4 34.Bc4',
+    annotations: {
+      '4...': 'Biến Kan: Đen đi a6 sớm để giữ sự linh hoạt, chưa vội quyết định vị trí các Mã.',
+      '5': 'Tượng d3 bảo vệ tốt e4 và chuẩn bị đẩy c4 để siết chặt trung tâm.',
+      '7...': 'Đen tranh trung tâm ngay bằng d5. Nếu được để yên, Đen sẽ có cặp tốt trung tâm vững chắc.',
+      '8':
+        'Fischer lập tức phá trung tâm Đen. Sau loạt đổi quân tiếp theo, Đen còn lại tốt d5 cô lập và tốt a6 yếu – những mục tiêu lâu dài.',
+      '12': 'Hậu chiếu, và chỉ một nước sau Hậu hai bên được đổi. Fischer hướng thẳng tới tàn cuộc, nơi các tốt yếu của Đen bị phơi bày.',
+      '13': 'Xe chiếm cột e mở, ghim Tượng e7 vào Vua đen.',
+      '16': 'Đổi Tượng đen thâm – quân phòng thủ tốt nhất của các ô đen. Sau đó ô c5 trở thành tiền đồn lý tưởng cho Mã trắng.',
+      '18': 'Tốt b4 giành không gian, cố định tốt a6 và giữ chắc ô c5.',
+      '19': 'Mã nhảy vào c5, tấn công tốt a6 và Tượng e6. Đen buộc phải lùi Tượng về c8 thụ động.',
+      '21': 'Xe chiếm ô e5, gây sức ép lên tốt d5 và chuẩn bị chuyển sang hàng 7.',
+      '22':
+        'Quyết định gây bất ngờ: Fischer đổi con Mã đầy uy lực lấy Tượng d7. Ông đánh giá rằng trong thế cờ thoáng có tốt ở cả hai cánh, Tượng d3 sẽ mạnh hơn hẳn Mã f6.',
+      '24': 'Xe xâm nhập hàng 7, tấn công các tốt và trói buộc quân Đen.',
+      '26': 'Vua trắng bước ra trận. Trong tàn cuộc, Vua là một quân chiến đấu chứ không còn là quân cần che chở.',
+      '29...': 'Petrosian đẩy tốt d kèm chiếu để giành ô d5 cho Mã, nhưng Vua trắng chỉ cần lùi về d2.',
+      '31': 'Hai Xe trắng cùng đứng trên hàng 7 – hình ảnh kinh điển của ưu thế tàn cuộc. Vua đen bị nhốt ở hàng cuối.',
+      '33...': 'Mã ăn tốt f4. Một số tài liệu cũ ghi nước này là 33...Nxb4.',
+      '34':
+        'Tượng chiếm đường chéo a2–g8, phối hợp với hai Xe trên hàng 7 vây chặt Vua đen. Chẳng hạn 34...Ne6 35.Rfe7+ Kd8 36.Rxe6 và Trắng thắng thêm quân. Petrosian đầu hàng.',
+    },
+    keyMoments: ['8', '19', '22', '31', '34'],
+    lessons: [
+      'Đổi Hậu không có nghĩa là hòa: trong tàn cuộc, những yếu điểm nhỏ như tốt cô lập trở nên chết người.',
+      'Tượng thường mạnh hơn Mã khi bàn cờ thoáng và có tốt ở cả hai cánh.',
+      'Xe trên hàng 7 – nhất là hai Xe – trói buộc toàn bộ thế trận đối phương.',
+      'Trong tàn cuộc, hãy đưa Vua ra trung tâm để tham chiến.',
+    ],
+    tags: ['Chiến lược', 'Tàn cuộc'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1044351',
+  },
+
+  // ------------------------------------------------------------------ 1972
+  {
+    id: 'spassky-fischer-1972-van-3',
+    title: 'Spassky – Fischer, ván 3 (1972): Chiến thắng đầu tiên của Fischer',
+    white: 'Boris Spassky',
+    black: 'Robert James Fischer',
+    event: 'Trận tranh ngôi vô địch thế giới, Reykjavik',
+    year: 1972,
+    result: '0-1',
+    opening: 'Phòng thủ Benoni hiện đại (Modern Benoni)',
+    difficulty: 4,
+    context:
+      'Trận tranh ngôi năm 1972 khởi đầu tồi tệ với Fischer: ông thua ván 1, rồi bị xử thua ván 2 vì không đến thi đấu để phản đối các máy quay phim. Ván 3 được tổ chức trong một căn phòng nhỏ phía sau, tránh xa khán giả. Đây là ván đầu tiên trong đời Fischer thắng được Spassky và là bước ngoặt của cả trận đấu.',
+    summary:
+      'Fischer chọn Benoni hiện đại sắc bén, và ở nước 11 tung ra 11...Nh5!? – chấp nhận tốt h chồng để đổi lấy cặp Tượng và thế chủ động. Spassky phản ứng chưa chính xác, đặc biệt nước 18.g3 làm yếu các ô trắng. Sau 31...Bxc3! Fischer loại bỏ quân bảo vệ tốt e4 và ăn được tốt này. Ván cờ bị hoãn ở nước 41; khi thấy nước đi niêm phong của Fischer, Spassky đầu hàng mà không chơi tiếp.',
+    moves: '1.d4 Nf6 2.c4 e6 3.Nf3 c5 4.d5 exd5 5.cxd5 d6 6.Nc3 g6 7.Nd2 Nbd7 8.e4 Bg7 9.Be2 O-O 10.O-O Re8 11.Qc2 Nh5 12.Bxh5 gxh5 13.Nc4 Ne5 14.Ne3 Qh4 15.Bd2 Ng4 16.Nxg4 hxg4 17.Bf4 Qf6 18.g3 Bd7 19.a4 b6 20.Rfe1 a6 21.Re2 b5 22.Rae1 Qg6 23.b3 Re7 24.Qd3 Rb8 25.axb5 axb5 26.b4 c4 27.Qd2 Rbe8 28.Re3 h5 29.R3e2 Kh7 30.Re3 Kg8 31.R3e2 Bxc3 32.Qxc3 Rxe4 33.Rxe4 Rxe4 34.Rxe4 Qxe4 35.Bh6 Qg6 36.Bc1 Qb1 37.Kf1 Bf5 38.Ke2 Qe4+ 39.Qe3 Qc2+ 40.Qd2 Qb3 41.Qd4 Bd3+',
+    annotations: {
+      '4': 'Trắng tiến tốt d5 giành không gian – cấu trúc đặc trưng của Benoni: Đen có đa số tốt ở cánh Hậu, Trắng có đa số tốt ở trung tâm.',
+      '7': 'Mã d2 hướng tới c4 để tấn công tốt d6 – kế hoạch quen thuộc chống lại Benoni.',
+      '11...':
+        'Nước đi đầy bất ngờ! Mã ra rìa bàn cờ và cho phép 12.Bxh5 phá cấu trúc tốt cánh Vua đen. Fischer đánh giá rằng hoạt động của quân và cặp Tượng quan trọng hơn hình thức của các tốt.',
+      '12...': 'Đen nhận tốt h chồng, nhưng Trắng đã mất Tượng trắng – quân bảo vệ các ô trắng – còn Đen giữ được cặp Tượng.',
+      '13...': 'Mã chiếm ô e5 vững chắc ở trung tâm và đuổi Mã c4.',
+      '14...': 'Hậu nhảy lên h4, tham gia vào cánh Vua.',
+      '15...': 'Mã nhảy g4 để đổi lấy Mã e3 – quân phòng thủ quan trọng của Trắng.',
+      '18': 'Nhiều nhà bình luận coi nước này là sai lầm: tốt g3 làm yếu thêm các ô trắng quanh Vua trắng, đúng nơi Tượng d7 của Đen có thể khai thác.',
+      '21...': 'Đen mở rộng ở cánh Hậu bằng b5 – chiến đấu trên cả hai cánh.',
+      '26...': 'Tốt c4 trở thành tốt thông được tốt b5 bảo vệ – một lợi thế lâu dài cho Đen.',
+      '31...':
+        'Đòn quyết định: Tượng đổi lấy Mã c3 – quân bảo vệ tốt e4. Giờ tốt e4 bị hai Xe và Hậu đen tấn công nhưng chỉ còn hai Xe trắng bảo vệ.',
+      '34...': 'Sau loạt đổi Xe, Fischer hơn một tốt.',
+      '35': 'Trắng đe dọa 36.Qg7#, nhưng 35...Qg6 chặn đứng ý đồ này.',
+      '38...': 'Hậu đen liên tục chiếu và tìm đường xâm nhập; Vua trắng ở e2 không có nơi trú ẩn an toàn.',
+      '41...':
+        'Nước đi niêm phong khi ván cờ bị hoãn: Tượng chiếu, Vua trắng không yên ổn và tốt thông c4 sẵn sàng tiến lên. Ngày hôm sau, Spassky đầu hàng mà không tiếp tục.',
+    },
+    keyMoments: ['11...', '18', '31...', '41...'],
+    lessons: [
+      'Đánh giá thế cờ phải cụ thể: tốt chồng không đáng sợ nếu đổi lại được quân hoạt động và cặp Tượng.',
+      'Loại bỏ quân phòng thủ (31...Bxc3) là cách đơn giản để thắng một quân bị tấn công nhiều lần.',
+      'Đếm số lần tấn công và bảo vệ một ô trước khi quyết định đổi quân.',
+      'Tốt thông được bảo vệ là lợi thế bền vững trong tàn cuộc.',
+    ],
+    orientation: 'black',
+    tags: ['Tranh ngôi vô địch', 'Chiến lược'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1044727',
+  },
+
+  // ------------------------------------------------------------------ 1974
+  {
+    id: 'karpov-unzicker-1974',
+    title: 'Karpov – Unzicker (1974): Nghệ thuật siết chặt',
+    white: 'Anatoly Karpov',
+    black: 'Wolfgang Unzicker',
+    event: 'Olympiad cờ vua, Nice',
+    year: 1974,
+    result: '1-0',
+    opening: 'Khai cuộc Tây Ban Nha – biến đóng, hệ thống Chigorin (Ruy Lopez, Closed, Chigorin)',
+    difficulty: 4,
+    context:
+      'Tại Olympiad Nice 1974, Anatoly Karpov ngồi bàn 1 của đội Liên Xô trong trận gặp Tây Đức và cầm Trắng gặp Wolfgang Unzicker, kỳ thủ số một của Tây Đức. Vài tháng sau, Karpov thắng chung kết các ứng viên và năm 1975 trở thành nhà vô địch thế giới. Ván cờ này thường được nhắc tới như hình mẫu cho lối chơi siết chặt đối thủ đặc trưng của ông.',
+    summary:
+      'Trong một ván Tây Ban Nha đóng, Karpov khóa trung tâm bằng d5 rồi giành không gian ở cánh Hậu với a4 và b4. Nước 24.Ba7! đưa Tượng vào sâu trận địa Đen, làm tê liệt Xe a8 và cả cánh Hậu Đen. Khi Đen bị trói buộc, Karpov chuyển sang cánh Vua với f4–f5, đổi Tượng trắng để làm yếu các ô trắng, rồi đưa Hậu và Mã áp sát. Unzicker đầu hàng ở nước 44 mà không có một đòn chiến thuật lớn nào.',
+    moves: '1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Be7 6.Re1 b5 7.Bb3 d6 8.c3 O-O 9.h3 Na5 10.Bc2 c5 11.d4 Qc7 12.Nbd2 Nc6 13.d5 Nd8 14.a4 Rb8 15.axb5 axb5 16.b4 Nb7 17.Nf1 Bd7 18.Be3 Ra8 19.Qd2 Rfc8 20.Bd3 g6 21.Ng3 Bf8 22.Ra2 c4 23.Bb1 Qd8 24.Ba7 Ne8 25.Bc2 Nc7 26.Rea1 Qe7 27.Bb1 Be8 28.Ne2 Nd8 29.Nh2 Bg7 30.f4 f6 31.f5 g5 32.Bc2 Bf7 33.Ng3 Nb7 34.Bd1 h6 35.Bh5 Qe8 36.Qd1 Nd8 37.Ra3 Kf8 38.R1a2 Kg8 39.Ng4 Kf8 40.Ne3 Kg8 41.Bxf7+ Nxf7 42.Qh5 Nd8 43.Qg6 Kf8 44.Nh5',
+    annotations: {
+      '9...': 'Hệ thống Chigorin: Mã a5 đuổi Tượng b3 và chuẩn bị c5 để giành không gian cánh Hậu.',
+      '13': 'Karpov khóa trung tâm. Từ đây cuộc chiến diễn ra ở hai cánh, và bên có nhiều không gian hơn sẽ có lợi.',
+      '14': 'Tấn công chuỗi tốt cánh Hậu của Đen để mở cột a.',
+      '16': 'Tốt b4 tấn công c5, buộc Mã đen lùi về b7 – một ô rất thụ động.',
+      '17': 'Thao tác quen thuộc của khai cuộc Tây Ban Nha: Mã đi vòng qua f1 sang g3 để tham gia cánh Vua.',
+      '22': 'Xe a2 chuẩn bị chồng hai Xe trên cột a.',
+      '24':
+        'Nước đi then chốt! Tượng nhảy vào a7, sâu trong trận địa Đen. Nó được Xe a2 bảo vệ nên Xe a8 không thể ăn; Tượng chặn cột a, khống chế ô b8 và làm tê liệt cả cánh Hậu Đen.',
+      '26': 'Trắng chồng hai Xe trên cột a. Các quân Đen chen chúc, gần như không có nước đi hữu ích.',
+      '30': 'Khi cánh Hậu đã bị khóa chặt, Karpov mở mặt trận thứ hai ở cánh Vua – nguyên tắc "hai điểm yếu".',
+      '31': 'Tốt f5 giành không gian và cố định các tốt đen, chuẩn bị đưa quân tới các ô h5 và g4.',
+      '35': 'Tượng h5 nhắm vào Tượng f7 – quân bảo vệ các ô trắng quanh Vua đen.',
+      '36': 'Hậu lùi về d1, chuẩn bị chuyển sang h5.',
+      '40': 'Các nước đi qua lại của Mã giúp Trắng vượt qua mốc kiểm soát thời gian ở nước 40, trong khi Đen vẫn không thể làm gì.',
+      '41': 'Đổi Tượng: các ô trắng quanh Vua đen giờ trống trải.',
+      '43': 'Hậu xâm nhập g6, ngay sát Vua đen.',
+      '44':
+        'Mã h5 tấn công Tượng g7 – quân bảo vệ cuối cùng của các tốt f6 và h6. Đen bị trói chân hoàn toàn, Unzicker đầu hàng.',
+    },
+    keyMoments: ['13', '24', '31', '41', '44'],
+    lessons: [
+      'Khi trung tâm bị khóa, hãy giành không gian ở cánh mà cấu trúc tốt cho phép.',
+      'Một quân xâm nhập sâu mà đối phương không đuổi được (Tượng a7) có thể làm tê liệt cả một cánh.',
+      'Nguyên tắc hai điểm yếu: trói buộc đối phương ở một cánh, rồi mở mặt trận ở cánh kia.',
+      'Đừng vội vàng: khi đối phương không có phản công, hãy tăng cường từng quân trước khi ra đòn.',
+    ],
+    tags: ['Chiến lược'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1067846',
+  },
+
+  {
+    id: 'karpov-korchnoi-1974-van-2',
+    title: 'Karpov – Korchnoi, ván 2 (1974): Tấn công Nam Tư mẫu mực',
+    white: 'Anatoly Karpov',
+    black: 'Viktor Korchnoi',
+    event: 'Chung kết các ứng viên, Moscow',
+    year: 1974,
+    result: '1-0',
+    opening: 'Phòng thủ Sicilia – biến Rồng, Tấn công Nam Tư (Sicilian Dragon, Yugoslav Attack)',
+    difficulty: 3,
+    context:
+      'Năm 1974, Anatoly Karpov (23 tuổi) gặp Viktor Korchnoi ở chung kết các ứng viên tại Moscow; người thắng sẽ thách đấu Bobby Fischer. Vì Fischer từ chối bảo vệ danh hiệu năm 1975, trận đấu này trên thực tế quyết định nhà vô địch thế giới tiếp theo. Karpov thắng 3 ván, thua 2 và hòa 19 ván; ván 2 là một trong những chiến thắng đẹp nhất của ông.',
+    summary:
+      'Korchnoi chọn biến Rồng sắc bén và Karpov đáp lại bằng Tấn công Nam Tư với kế hoạch kinh điển: nhập thành dài, đẩy tốt h và g, đổi Tượng g7 rồi mở cột h. Các nước 16.Nde2 và 19.Rd3 giữ chặt ô c3 trước mọi đòn thí của Đen. Sau 20.g5! và 24.e5!, hàng rào bảo vệ Vua đen tan vỡ; Korchnoi đầu hàng ở nước 27 khi sắp mất Hậu.',
+    moves: '1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 g6 6.Be3 Bg7 7.f3 Nc6 8.Qd2 O-O 9.Bc4 Bd7 10.h4 Rc8 11.Bb3 Ne5 12.O-O-O Nc4 13.Bxc4 Rxc4 14.h5 Nxh5 15.g4 Nf6 16.Nde2 Qa5 17.Bh6 Bxh6 18.Qxh6 Rfc8 19.Rd3 R4c5 20.g5 Rxg5 21.Rd5 Rxd5 22.Nxd5 Re8 23.Nef4 Bc6 24.e5 Bxd5 25.exf6 exf6 26.Qxh7+ Kf8 27.Qh8+',
+    annotations: {
+      '6...': 'Biến Rồng: Tượng g7 trên đường chéo dài là vũ khí chính của Đen.',
+      '7': 'Tấn công Nam Tư: f3, Qd2, nhập thành dài, rồi đẩy tốt h và g vào cánh Vua đen.',
+      '10': 'Tốt h tiến lên – mục tiêu là mở cột h trước Vua đen.',
+      '12...': 'Mã nhảy c4 để đổi lấy Tượng b3, một quân tấn công quan trọng của Trắng.',
+      '13...': 'Xe c4 gây áp lực trên cột c; Đen luôn rình đòn thí Xe ở c3.',
+      '14': 'Thí tốt để mở cột h! Nếu Đen ăn bằng Mã, Trắng đẩy g4 đuổi Mã đi.',
+      '15': 'Mã đen bị đuổi khỏi h5, và cột h đã mở cho Xe h1.',
+      '16':
+        'Nước đi tinh tế: Mã d4 lùi về e2 để thêm một quân bảo vệ c3, phòng ngừa đòn thí Xe ...Rxc3, đồng thời mở cột d.',
+      '17': 'Đổi Tượng g7 – quân phòng thủ quan trọng nhất của Vua đen.',
+      '18': 'Hậu trắng đứng ở h6, sát ô h7. Mã f6 là quân then chốt bảo vệ h7, nên Trắng sẽ tìm cách đuổi nó đi.',
+      '19': 'Xe lên d3 bảo vệ c3 theo hàng ngang – Trắng không cho Đen bất kỳ phản công nào.',
+      '20': 'Thí tốt để đuổi Mã f6 – quân bảo vệ h7. Korchnoi ăn tốt bằng Xe để giữ Mã.',
+      '21': 'Mời đổi Xe để đưa Mã c3 vào d5, nơi nó nhắm thẳng vào Mã f6 và tốt e7.',
+      '23': 'Mã thứ hai lao vào trận từ f4, tăng thêm sức ép lên cánh Vua đen.',
+      '24':
+        'Đòn kết thúc! Tốt e5 tấn công Mã f6. Sau 24...Bxd5 25.exf6 exf6 26.Qxh7+ Kf8 27.Qh8+, Vua đen bị lùa ra giữa bàn cờ.',
+      '27':
+        'Sau 27...Ke7 28.Nxd5+ Qxd5 29.Re1+, Trắng đổi Xe lấy Hậu và thắng dễ dàng. Korchnoi đầu hàng.',
+    },
+    keyMoments: ['14', '16', '20', '24', '27'],
+    lessons: [
+      'Khi hai bên nhập thành khác phía, tốc độ tấn công là tất cả: hãy mở cột trước Vua đối phương càng nhanh càng tốt.',
+      'Đổi quân phòng thủ chủ chốt (Tượng g7 trong biến Rồng) làm suy yếu nghiêm trọng thế phòng thủ.',
+      'Trước khi tấn công, hãy dập tắt phản công của đối phương (Nde2 và Rd3 bảo vệ c3).',
+      'Thí tốt để mở cột hoặc đuổi quân phòng thủ thường rất đáng giá.',
+    ],
+    tags: ['Tấn công Vua', 'Khai cuộc'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1067858',
+  },
+
+  // ------------------------------------------------------------------ 1983
+  {
+    id: 'kasparov-portisch-1983',
+    title: 'Kasparov – Portisch (1983): Đòn thí hai Tượng',
+    white: 'Garry Kasparov',
+    black: 'Lajos Portisch',
+    event: 'Giải quốc tế Nikšić, Nam Tư',
+    year: 1983,
+    result: '1-0',
+    opening: 'Phòng thủ Ấn Độ – Hậu, hệ thống Petrosian (Queen\'s Indian Defence, Petrosian System)',
+    difficulty: 4,
+    context:
+      'Giải Nikšić 1983 quy tụ nhiều kỳ thủ hàng đầu như Larsen, Spassky và Portisch. Garry Kasparov, khi đó 20 tuổi, giành ngôi nhất với 11 điểm. Ván thắng Lajos Portisch – một trong những kỳ thủ phương Tây mạnh nhất thời đó – nổi tiếng với đòn thí hai Tượng gợi nhớ ván Lasker – Bauer năm 1889.',
+    summary:
+      'Portisch chơi vững chắc, nhưng sau 17.d5! trung tâm bị mở tung và hai Tượng trắng bỗng nhắm thẳng vào cánh Vua đen. Khi Đen dùng Tượng ăn tốt d5, Kasparov tung ra đòn thí hai Tượng kinh điển 19.Bxh7+! và 21.Bxg7!, phá tan hàng rào bảo vệ Vua đen. Hậu, Mã và hai Xe trắng sau đó săn Vua đen từ g8 lên tận f3, và Portisch đầu hàng khi sắp bị chiếu hết.',
+    moves: '1.d4 Nf6 2.c4 e6 3.Nf3 b6 4.Nc3 Bb7 5.a3 d5 6.cxd5 Nxd5 7.e3 Nxc3 8.bxc3 Be7 9.Bb5+ c6 10.Bd3 c5 11.O-O Nc6 12.Bb2 Rc8 13.Qe2 O-O 14.Rad1 Qc7 15.c4 cxd4 16.exd4 Na5 17.d5 exd5 18.cxd5 Bxd5 19.Bxh7+ Kxh7 20.Rxd5 Kg8 21.Bxg7 Kxg7 22.Ne5 Rfd8 23.Qg4+ Kf8 24.Qf5 f6 25.Nd7+ Rxd7 26.Rxd7 Qc5 27.Qh7 Rc7 28.Qh8+ Kf7 29.Rd3 Nc4 30.Rfd1 Ne5 31.Qh7+ Ke6 32.Qg8+ Kf5 33.g4+ Kf4 34.Rd4+ Kf3 35.Qb3+',
+    annotations: {
+      '5': 'Hệ thống Petrosian: tốt a3 ngăn Tượng đen ghim Mã c3 bằng ...Bb4.',
+      '12': 'Tượng lên b2 – hiện bị tốt c3 chắn, nhưng sẽ trở nên rất mạnh khi đường chéo dài được mở.',
+      '15': 'Trắng chấp nhận cặp "tốt treo" c4–d4, đổi lại có không gian và đường mở cho các quân.',
+      '16...': 'Mã a5 tấn công tốt c4, gây áp lực lên cặp tốt treo.',
+      '17':
+        'Đột phá! Tốt d5 mở trung tâm đúng lúc các quân trắng đã sẵn sàng. Sau các nước đổi, đường chéo a1–h8 của Tượng b2 mở thẳng tới g7.',
+      '18...': 'Đen ăn tốt, nhưng Tượng d5 chỉ an toàn chừng nào Tượng d3 còn chắn cột d trước Xe d1.',
+      '19':
+        'Thí Tượng thứ nhất! Sau 19...Kxh7 20.Rxd5, Xe trắng lấy lại quân, còn Vua đen đã mất tốt h7 che chắn.',
+      '21': 'Thí Tượng thứ hai – mô thức Lasker – Bauer. Vua đen mất toàn bộ tốt che chắn.',
+      '22': 'Mã nhảy e5, mở đường cho Hậu sang g4 chiếu và chuẩn bị đưa thêm quân vào tấn công.',
+      '24': 'Đe dọa 25.Qxf7#, vì ô f7 bị cả Hậu và Mã e5 tấn công. Đen buộc phải đi f6.',
+      '25': 'Mã chiếu buộc Xe d8 ăn. Sau 26.Rxd7 Trắng hơn chất, và Xe d7 tấn công cả Hậu lẫn Tượng đen.',
+      '27': 'Hậu áp sát Vua đen từ h7.',
+      '29': 'Xe d3 chuẩn bị chuyển dọc hàng 3 để tham gia tấn công.',
+      '31': 'Cuộc săn Vua bắt đầu: Vua đen bị đẩy khỏi nơi trú ẩn cuối cùng.',
+      '33': 'Tốt g4 chiếu, dồn Vua đen tiến sâu vào trận địa Trắng.',
+      '35':
+        'Vua đen bị dồn tới f3 và sắp bị chiếu hết, chẳng hạn 35...Ke2 36.Qe3# hoặc 35...Nd3 36.Qxd3#. Portisch đầu hàng.',
+    },
+    keyMoments: ['17', '19', '21', '25', '35'],
+    lessons: [
+      'Đột phá trung tâm đúng lúc biến những quân Tượng đang bị chắn thành vũ khí tấn công.',
+      'Mô thức thí hai Tượng ở h7 và g7 (Lasker – Bauer) là mẫu hình cần thuộc lòng.',
+      'Sau khi phá hàng rào tốt, hãy đưa thêm quân vào tấn công thay vì vội thu hồi vật chất.',
+      'Một quân vừa ăn tốt "miễn phí" có thể đang đứng đúng đường đi của một đòn chiến thuật – hãy kiểm tra kỹ.',
+    ],
+    tags: ['Tấn công Vua', 'Thí quân'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1070074',
+  },
+
+  // ------------------------------------------------------------------ 1985
+  {
+    id: 'beliavsky-nunn-1985',
+    title: 'Beliavsky – Nunn (1985): Ván cờ bất tử của Nunn',
+    white: 'Alexander Beliavsky',
+    black: 'John Nunn',
+    event: 'Giải Hoogovens, Wijk aan Zee',
+    year: 1985,
+    result: '0-1',
+    opening: 'Phòng thủ Ấn Độ cổ – biến Sämisch (King\'s Indian Defence, Sämisch Variation)',
+    difficulty: 5,
+    context:
+      'John Nunn – đại kiện tướng người Anh, tiến sĩ toán học và là một trong những tác giả sách cờ xuất sắc nhất – gặp kỳ thủ Liên Xô Alexander Beliavsky tại giải Wijk aan Zee 1985. Ván cờ được gọi là "Ván cờ bất tử của Nunn" và được coi là một trong những ván cờ đẹp nhất thập niên 1980.',
+    summary:
+      'Trong biến Sämisch, Nunn phản công ở trung tâm bằng ...f5. Nước 12...Rxf3!! mở màn chuỗi thí quân: Đen mất Mã h5 nhưng các quân còn lại ồ ạt lao vào Vua trắng chưa nhập thành. Sau khi thí thêm Xe ở f2, Hậu, Mã và hai Tượng đen phối hợp tuyệt đẹp; đến nước 27, Nunn đã lấy lại toàn bộ vật chất, còn Vua trắng không còn lối thoát.',
+    moves: '1.d4 Nf6 2.c4 g6 3.Nc3 Bg7 4.e4 d6 5.f3 O-O 6.Be3 Nbd7 7.Qd2 c5 8.d5 Ne5 9.h3 Nh5 10.Bf2 f5 11.exf5 Rxf5 12.g4 Rxf3 13.gxh5 Qf8 14.Ne4 Bh6 15.Qc2 Qf4 16.Ne2 Rxf2 17.Nxf2 Nf3+ 18.Kd1 Qh4 19.Nd3 Bf5 20.Nec1 Nd2 21.hxg6 hxg6 22.Bg2 Nxc4 23.Qf2 Ne3+ 24.Ke2 Qc4 25.Bf3 Rf8 26.Rg1 Nc2 27.Kd1 Bxd3',
+    annotations: {
+      '5': 'Biến Sämisch: tốt f3 củng cố e4 và chuẩn bị Be3, Qd2 – một hệ thống rất sắc bén.',
+      '8...': 'Mã chiếm ô e5 vững chắc ở trung tâm.',
+      '9...': 'Mã ra h5 để mở đường cho tốt f – cách phản công kinh điển trong Ấn Độ cổ.',
+      '10...': 'Đen tấn công trung tâm ngay khi Vua trắng còn ở e1.',
+      '12': 'Trắng đuổi cả Xe f5 lẫn Mã h5 – có vẻ như Đen sắp mất quân.',
+      '12...':
+        'Đòn thí bất ngờ! Nếu 13.Nxf3 thì 13...Nxf3+ chiếu và chĩa đôi Vua với Hậu d2. Trắng ăn Mã h5, và Đen chấp nhận thiếu một quân để đổi lấy thế tấn công.',
+      '13...': 'Hậu lùi về f8 để hỗ trợ Xe trên cột f, nhắm vào Tượng f2.',
+      '14...': 'Tượng h6 tấn công Hậu d2 với tiến độ và chiếm đường chéo c1–h6.',
+      '15...': 'Hậu tiến lên f4, các quân đen bao vây Vua trắng.',
+      '16...': 'Thí tiếp Xe! Đen loại bỏ Tượng f2 để Mã e5 nhảy vào f3 kèm chiếu.',
+      '17...': 'Mã chiếu, và Vua trắng chỉ còn một ô duy nhất là d1.',
+      '18...': 'Hậu h4 tấn công Mã f2 – quân này không có ai bảo vệ vì Mã e2 chắn đường Hậu c2.',
+      '19...': 'Tượng f5 ghim Mã d3 vào Hậu c2.',
+      '20...': 'Mã chuyển sang d2, nhắm vào tốt c4 và ô f1. Vua trắng bị bao vây từ mọi phía.',
+      '23...': 'Mã chiếu, đuổi Vua trắng ra giữa bàn cờ.',
+      '24...':
+        'Nước đi yên lặng tuyệt đẹp: Hậu chiếm c4, khống chế các ô quanh Vua trắng, trong khi Mã và hai Tượng dệt lưới chiếu hết.',
+      '26...': 'Mã nhảy c2, tấn công Xe a1 và ô e1.',
+      '27...':
+        'Tượng ăn Mã d3 và đồng thời bảo vệ Mã c2. Lúc này vật chất hai bên đã cân bằng, nhưng Trắng không thể tránh mất thêm quân trước hàng loạt đe dọa. Beliavsky đầu hàng.',
+    },
+    keyMoments: ['12...', '16...', '18...', '24...', '27...'],
+    lessons: [
+      'Vua bị kẹt ở trung tâm là mục tiêu lý tưởng cho những đòn thí quân.',
+      'Giá trị của quân phụ thuộc vào hoạt động: một nhóm quân phối hợp tốt mạnh hơn những quân thừa đứng yên.',
+      'Hãy để ý các đòn chĩa đôi ẩn (13.Nxf3? Nxf3+) khi đánh giá một đòn thí.',
+      'Một nước yên lặng giữa trận tấn công (24...Qc4) thường mạnh hơn một nước chiếu vội vàng.',
+    ],
+    orientation: 'black',
+    tags: ['Tấn công Vua', 'Thí quân'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1103322',
+  },
+
+  {
+    id: 'karpov-kasparov-1985-van-24',
+    title: 'Karpov – Kasparov, ván 24 (1985): Lên ngôi ở tuổi 22',
+    white: 'Anatoly Karpov',
+    black: 'Garry Kasparov',
+    event: 'Trận tranh ngôi vô địch thế giới, Moscow',
+    year: 1985,
+    result: '0-1',
+    opening: 'Phòng thủ Sicilia – biến Scheveningen (Sicilian Defence, Scheveningen Variation)',
+    difficulty: 5,
+    context:
+      'Trước ván cuối cùng của trận tranh ngôi 1985, Kasparov dẫn 12–11. Nhà vô địch Karpov buộc phải thắng để gỡ hòa 12–12 và giữ danh hiệu, còn Kasparov chỉ cần hòa. Thay vì phòng thủ thụ động, Kasparov chọn Phòng thủ Sicilia và chấp nhận một trận đấu mở với cơ hội cho cả hai bên.',
+    summary:
+      'Karpov tấn công cánh Vua ngay từ nước 15 với g4–g5 và đưa Xe sang h3. Kasparov phản công đúng lúc bằng 25...f5!, rồi thí tốt 31...g5! để mở đường cho các quân. Trong lúc thiếu thời gian, Karpov mắc sai lầm ở nước 36 và 40; Kasparov kết thúc bằng 40...Qa7+ và 42...Nd4+, thắng ván đấu và trở thành nhà vô địch thế giới thứ 13 ở tuổi 22.',
+    moves: '1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 a6 6.Be2 e6 7.O-O Be7 8.f4 O-O 9.Kh1 Qc7 10.a4 Nc6 11.Be3 Re8 12.Bf3 Rb8 13.Qd2 Bd7 14.Nb3 b6 15.g4 Bc8 16.g5 Nd7 17.Qf2 Bf8 18.Bg2 Bb7 19.Rad1 g6 20.Bc1 Rbc8 21.Rd3 Nb4 22.Rh3 Bg7 23.Be3 Re7 24.Kg1 Rce8 25.Rd1 f5 26.gxf6 Nxf6 27.Rg3 Rf7 28.Bxb6 Qb8 29.Be3 Nh5 30.Rg4 Nf6 31.Rh4 g5 32.fxg5 Ng4 33.Qd2 Nxe3 34.Qxe3 Nxc2 35.Qb6 Ba8 36.Rxd6 Rb7 37.Qxa6 Rxb3 38.Rxe6 Rxb2 39.Qc4 Kh8 40.e5 Qa7+ 41.Kh1 Bxg2+ 42.Kxg2 Nd4+',
+    annotations: {
+      '6...': 'Đen chọn cấu trúc Scheveningen với các tốt e6 và d6 – chắc chắn mà vẫn giàu khả năng phản công.',
+      '8': 'Tốt f4 chuẩn bị tấn công cánh Vua – Karpov cần thắng nên chọn lối chơi chủ động.',
+      '15': 'Bắt đầu tấn công: tốt g4–g5 đuổi Mã f6 khỏi vị trí phòng thủ.',
+      '15...': 'Tượng lùi về c8 để tìm đường sang b7, nhắm vào tốt e4.',
+      '21': 'Xe d3 chuẩn bị sang h3 để tấn công Vua đen.',
+      '22': 'Xe h3 cùng tốt g5 tạo sức ép lớn lên h7.',
+      '25...': 'Phản công đúng lúc! Kasparov mở cột f, đẩy lùi thế tấn công của Trắng và kích hoạt các quân của mình.',
+      '26': 'Bắt tốt qua đường: tốt g5 ăn tốt f5 vừa tiến hai ô và đứng ở f6.',
+      '28': 'Karpov ăn tốt b6 và hơn tốt, nhưng Tượng rời xa cánh Vua.',
+      '31...': 'Thí tốt! Sau 32.fxg5, Mã đen có ô g4 và Tượng g7 hoạt động mạnh trên đường chéo dài.',
+      '32...': 'Mã g4 tấn công Hậu f2 và Tượng e3.',
+      '34...': 'Mã thứ hai ăn tốt c2. Thế cờ đã đảo chiều: các quân đen hoạt động mạnh mẽ.',
+      '35...': 'Tượng lùi về a8 nhưng vẫn nằm trên đường chéo dài a8–h1, chờ cơ hội.',
+      '36': 'Sai lầm trong lúc thiếu thời gian. Phân tích sau ván cho thấy đổi Hậu bằng 36.Qxb8 an toàn hơn; sau nước trong ván, Đen giành thế chủ động với 36...Rb7!',
+      '40': 'Sai lầm quyết định: tốt e5 mở đường chéo a8–h1 cho Tượng a8, nhắm thẳng vào Tượng g2 và Vua trắng.',
+      '40...': 'Hậu chiếu theo đường chéo a7–g1.',
+      '41...': 'Tượng ăn Tượng g2 kèm chiếu – đường chéo dài vừa được mở đã phát huy tác dụng.',
+      '42...':
+        'Chiếu mở: Mã rời c2 để Xe b2 chiếu Vua g2, đồng thời Mã d4 tấn công Xe e6. Karpov đầu hàng, và Kasparov trở thành nhà vô địch thế giới.',
+    },
+    keyMoments: ['15', '25...', '31...', '40', '42...'],
+    lessons: [
+      'Ngay cả khi chỉ cần hòa, phòng thủ chủ động và phản công đúng lúc vẫn là cách tốt nhất.',
+      'Khi đối phương tấn công một cánh, phản công bằng cách mở cột (25...f5) thường rất hiệu quả.',
+      'Thí tốt để kích hoạt các quân (31...g5) là công cụ mạnh trong thế cờ phức tạp.',
+      'Áp lực thời gian khiến cả nhà vô địch cũng sai lầm – hãy phân bổ thời gian hợp lý.',
+    ],
+    orientation: 'black',
+    tags: ['Tranh ngôi vô địch', 'Phòng thủ'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1067179',
+  },
+
+  // ------------------------------------------------------------------ 1990
+  {
+    id: 'kasparov-karpov-1990-van-20',
+    title: 'Kasparov – Karpov, ván 20 (1990): Bão tố trong khai cuộc Tây Ban Nha',
+    white: 'Garry Kasparov',
+    black: 'Anatoly Karpov',
+    event: 'Trận tranh ngôi vô địch thế giới, Lyon',
+    year: 1990,
+    result: '1-0',
+    opening: 'Khai cuộc Tây Ban Nha – biến Zaitsev (Ruy Lopez, Closed, Zaitsev Variation)',
+    difficulty: 5,
+    context:
+      'Trận tranh ngôi 1990 là lần thứ năm và cũng là lần cuối Kasparov và Karpov gặp nhau trong một trận tranh ngôi vô địch; 12 ván đầu diễn ra ở New York, 12 ván sau ở Lyon (Pháp). Trước ván 20, Kasparov chỉ dẫn 10–9. Chiến thắng trong ván này nâng cách biệt lên hai điểm, và cuối cùng Kasparov bảo vệ thành công danh hiệu với tỷ số 12,5–11,5.',
+    summary:
+      'Trong biến Zaitsev, Kasparov đưa Xe a3 đi dọc hàng 3 sang cánh Vua – một ý tưởng tấn công độc đáo. Karpov phản công bằng tốt thông c, nhưng Kasparov thí Mã 26.Nxh6! và bỏ mặc Tượng b2 để dồn quân vào cánh Vua đen. Sau nước yên lặng 31.Kh2, đòn kết thúc 34.Qxh6+! Qxh6 35.Nf7+ đem lại cho Trắng ưu thế vật chất quyết định.',
+    moves: '1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Be7 6.Re1 b5 7.Bb3 d6 8.c3 O-O 9.h3 Bb7 10.d4 Re8 11.Nbd2 Bf8 12.a4 h6 13.Bc2 exd4 14.cxd4 Nb4 15.Bb1 c5 16.d5 Nd7 17.Ra3 f5 18.Rae3 Nf6 19.Nh2 Kh8 20.b3 bxa4 21.bxa4 c4 22.Bb2 fxe4 23.Nxe4 Nfxd5 24.Rg3 Re6 25.Ng4 Qe8 26.Nxh6 c3 27.Nf5 cxb2 28.Qg4 Bc8 29.Qh4+ Rh6 30.Nxh6 gxh6 31.Kh2 Qe5 32.Ng5 Qf6 33.Re8 Bf5 34.Qxh6+ Qxh6 35.Nf7+ Kh7 36.Bxf5+ Qg6 37.Bxg6+ Kg7 38.Rxa8 Be7 39.Rb8 a5 40.Be4+ Kxf7 41.Bxd5+',
+    annotations: {
+      '9...': 'Biến Zaitsev: Tượng b7 và Xe e8 cùng gây áp lực lên tốt e4.',
+      '12': 'Tốt a4 tấn công chuỗi tốt cánh Hậu của Đen – nước đi chính của lý thuyết.',
+      '16': 'Trắng khóa trung tâm bằng d5, giành không gian.',
+      '17': 'Ý tưởng sáng tạo: Xe a3 sẽ chạy dọc hàng 3 sang cánh Vua.',
+      '17...': 'Đen phá trung tâm bằng f5 trước khi Trắng kịp tấn công.',
+      '19': 'Mã h2 chuẩn bị Ng4 – thêm một quân hướng về cánh Vua đen.',
+      '21...': 'Đen có tốt thông c4 đầy nguy hiểm, nhắm tới c3 và Tượng b2.',
+      '24': 'Xe g3 nhắm thẳng vào Vua đen theo cột g.',
+      '26': 'Thí Mã! Trắng ăn tốt h6, phá vỡ lớp vỏ bảo vệ quanh Vua đen.',
+      '26...': 'Karpov không ăn Mã mà phản công: tốt c3 tấn công Tượng b2.',
+      '27': 'Kasparov bỏ mặc Tượng b2, tiếp tục dồn quân về cánh Vua.',
+      '29': 'Hậu chiếu buộc Xe đen chặn ở h6, và Mã ăn ngay Xe đó.',
+      '31': 'Nước đi yên lặng giữa trận tấn công: Kasparov đưa Vua tới nơi an toàn hơn trước, rồi mới tung đòn kết thúc.',
+      '33': 'Xe xâm nhập e8, tấn công Tượng f8 và trói buộc hàng cuối của Đen.',
+      '34':
+        'Thí Hậu! Sau 34...Qxh6 35.Nf7+, Mã chiếu và đồng thời tấn công Hậu h6. Trắng sẽ lấy lại Hậu và ăn thêm Xe a8.',
+      '36': 'Tượng ăn Tượng f5 kèm chiếu – Trắng thu lại vật chất với lời.',
+      '41': 'Trắng giữ hai Xe chống lại Tượng và Mã. Karpov đầu hàng.',
+    },
+    keyMoments: ['17', '26', '31', '34'],
+    lessons: [
+      'Xe có thể tham gia tấn công cánh Vua qua hàng 3 – kỹ thuật "nâng Xe" rất hữu ích.',
+      'Trong cuộc đua tấn công, thời gian quý hơn vật chất: Kasparov bỏ mặc Tượng b2 để tập trung vào Vua đen.',
+      'Trước khi ra đòn quyết định, hãy đưa Vua mình ra khỏi những nguy cơ bị chiếu.',
+      'Thí Hậu để chĩa đôi là một mô thức chiến thuật đẹp và hiệu quả.',
+    ],
+    tags: ['Tranh ngôi vô địch', 'Tấn công Vua', 'Thí quân'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1067294',
+  },
+
+  // ------------------------------------------------------------------ 1991
+  {
+    id: 'ivanchuk-yusupov-1991',
+    title: 'Ivanchuk – Yusupov (1991): Cơn lốc ở Brussels',
+    white: 'Vassily Ivanchuk',
+    black: 'Artur Yusupov',
+    event: 'Tứ kết các ứng viên, Brussels (ván 9 – ván phân định)',
+    year: 1991,
+    result: '0-1',
+    opening: 'Phòng thủ Ấn Độ cổ – biến Fianchetto (King\'s Indian Defence, Fianchetto Variation)',
+    difficulty: 5,
+    context:
+      'Năm 1991, Vassily Ivanchuk – tài năng trẻ vừa vô địch giải Linares – gặp Artur Yusupov ở tứ kết các ứng viên tại Brussels. Sau tám ván chính, tỷ số là 4–4 và hai người bước vào các ván phân định. Yusupov thắng ván 9 này, hòa ván tiếp theo và đi tiếp với tỷ số 5,5–4,5.',
+    summary:
+      'Từ một thế Ấn Độ cổ fianchetto, Yusupov thí tốt bằng 12...e3!, cắm một chiếc gai sâu vào trận địa Trắng. Khi Ivanchuk mải ăn quân ở cánh Hậu, Đen dồn toàn lực vào Vua trắng: 23...Nxh4!, rồi 27...Re6! đưa Xe sang g6. Ivanchuk thí lại Hậu để phá bớt quân tấn công, nhưng Mã và Hậu đen tiếp tục vây bắt Vua trắng, và ván cờ kết thúc với đòn chiếu hết không thể ngăn cản.',
+    moves: '1.c4 e5 2.g3 d6 3.Bg2 g6 4.d4 Nd7 5.Nc3 Bg7 6.Nf3 Ngf6 7.O-O O-O 8.Qc2 Re8 9.Rd1 c6 10.b3 Qe7 11.Ba3 e4 12.Ng5 e3 13.f4 Nf8 14.b4 Bf5 15.Qb3 h6 16.Nf3 Ng4 17.b5 g5 18.bxc6 bxc6 19.Ne5 gxf4 20.Nxc6 Qg5 21.Bxd6 Ng6 22.Nd5 Qh5 23.h4 Nxh4 24.gxh4 Qxh4 25.Nde7+ Kh8 26.Nxf5 Qh2+ 27.Kf1 Re6 28.Qb7 Rg6 29.Qxa8+ Kh7 30.Qg8+ Kxg8 31.Nce7+ Kh7 32.Nxg6 fxg6 33.Nxg7 Nf2 34.Bxf4 Qxf4 35.Ne6 Qh2 36.Rdb1 Nh3 37.Rb7+ Kh8 38.Rb8+ Qxb8 39.Bxh3 Qg3',
+    annotations: {
+      '1': 'Ván cờ bắt đầu bằng Khai cuộc Anh rồi chuyển sang cấu trúc Ấn Độ cổ.',
+      '11...': 'Đen giành không gian ở trung tâm, đuổi Mã f3.',
+      '12...': 'Thí tốt! Tốt e3 cắm sâu vào trận địa Trắng, cản trở sự phối hợp giữa các quân và làm yếu các ô d2, f2.',
+      '14...': 'Tượng f5 tấn công Hậu c2 với tiến độ.',
+      '17...': 'Đen mở mặt trận ở cánh Vua: tốt g5 tấn công tốt f4.',
+      '19...': 'Đen bình thản bỏ mặc tốt c6 để ăn tốt f4, mở cột g và đường chéo cho Tượng g7.',
+      '20...': 'Hậu tránh đòn tấn công của Mã c6 và lập tức tham gia cánh Vua theo cột g.',
+      '23...': 'Thí Mã để mở cột h! Sau 24.gxh4 Qxh4, Hậu đen áp sát Vua trắng.',
+      '26...': 'Hậu chiếu, và Vua trắng chỉ còn ô f1 vì f2 đã bị tốt e3 khống chế.',
+      '27...': 'Nước đi tuyệt đẹp: Xe e6 chuẩn bị chuyển sang g6 dọc hàng 6, bỏ mặc Xe a8 cho Hậu trắng.',
+      '29...': 'Đen không quan tâm tới việc mất Xe a8: thế tấn công vào Vua trắng quan trọng hơn mọi thứ.',
+      '30': 'Ivanchuk trả lại Hậu để phá bớt quân tấn công: sau 30...Kxg8 31.Nce7+ và 32.Nxg6, Trắng loại bỏ Xe g6 rồi ăn tiếp Tượng g7.',
+      '33...': 'Mã nhảy f2, chuẩn bị cùng Hậu dệt lưới quanh Vua trắng.',
+      '36...': 'Mã chuyển sang h3, khống chế các ô g1 và f2.',
+      '39...': 'Hậu g3 đe dọa 40...Qf2#, và Trắng không có cách nào ngăn cản. Ivanchuk đầu hàng.',
+    },
+    keyMoments: ['12...', '19...', '23...', '27...', '39...'],
+    lessons: [
+      'Một tốt cắm sâu (tốt e3) có thể chia cắt và làm tê liệt thế trận đối phương.',
+      'Trong tấn công Vua, thời gian và số quân tham chiến quan trọng hơn vật chất.',
+      'Nâng Xe dọc hàng ngang (27...Re6 rồi Rg6) là cách nhanh nhất đưa Xe vào cánh Vua.',
+      'Ăn quân ở cánh xa khi Vua mình đang bị tấn công thường là sai lầm chết người.',
+    ],
+    orientation: 'black',
+    tags: ['Tấn công Vua', 'Thí quân'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1060180',
+  },
+
+  {
+    id: 'short-timman-1991',
+    title: 'Short – Timman (1991): Cuộc hành quân của Vua',
+    white: 'Nigel Short',
+    black: 'Jan Timman',
+    event: 'Giải Interpolis, Tilburg',
+    year: 1991,
+    result: '1-0',
+    opening: 'Phòng thủ Alekhine – biến Hiện đại (Alekhine Defence, Modern Variation)',
+    difficulty: 3,
+    context:
+      'Tại giải Tilburg 1991, Nigel Short – kỳ thủ số một nước Anh, người hai năm sau giành quyền thách đấu Kasparov – gặp Jan Timman, kỳ thủ hàng đầu Hà Lan. Ván cờ trở nên bất hủ nhờ một cuộc hành quân hiếm thấy: giữa trung cuộc, khi trên bàn vẫn còn Hậu và Xe, Vua trắng tự mình đi từ g1 tới g5 để kết liễu đối thủ.',
+    summary:
+      'Timman chọn Phòng thủ Alekhine và rơi vào thế bị động khi Short chiếm cột d và đưa Hậu sang h4. Hai Xe trắng xâm nhập, Tượng đen thâm bị đổi, và các ô đen quanh Vua đen trở nên trống trải. Nhận thấy Đen không còn cách nào chiếu Vua trắng, Short đưa Vua hành quân Kh2–g3–f4–g5 để hỗ trợ Hậu chiếu hết ở g7; Timman đầu hàng ngay khi Vua trắng tới g5.',
+    moves: '1.e4 Nf6 2.e5 Nd5 3.d4 d6 4.Nf3 g6 5.Bc4 Nb6 6.Bb3 Bg7 7.Qe2 Nc6 8.O-O O-O 9.h3 a5 10.a4 dxe5 11.dxe5 Nd4 12.Nxd4 Qxd4 13.Re1 e6 14.Nd2 Nd5 15.Nf3 Qc5 16.Qe4 Qb4 17.Bc4 Nb6 18.b3 Nxc4 19.bxc4 Re8 20.Rd1 Qc5 21.Qh4 b6 22.Be3 Qc6 23.Bh6 Bh8 24.Rd8 Bb7 25.Rad1 Bg7 26.R8d7 Rf8 27.Bxg7 Kxg7 28.R1d4 Rae8 29.Qf6+ Kg8 30.h4 h5 31.Kh2 Rc8 32.Kg3 Rce8 33.Kf4 Bc8 34.Kg5',
+    annotations: {
+      '1...': 'Phòng thủ Alekhine: Đen mời Trắng đẩy tốt lên rồi tấn công chuỗi tốt đã tiến xa.',
+      '12...': 'Hậu đen đứng giữa bàn cờ nhưng có thể trở thành mục tiêu bị đuổi.',
+      '16': 'Hậu e4 kiểm soát trung tâm và chuẩn bị chuyển sang cánh Vua.',
+      '19': 'Trắng nhận tốt c chồng, nhưng đổi lại các quân còn lại đều hoạt động tốt hơn quân Đen.',
+      '21': 'Hậu h4 nhắm vào cánh Vua đen; kế hoạch tiếp theo là Bh6 để đổi Tượng g7.',
+      '23': 'Tượng h6 tìm cách đổi Tượng g7 – quân bảo vệ các ô đen quanh Vua đen.',
+      '24': 'Xe xâm nhập d8, tấn công Xe e8 và Tượng c8.',
+      '26': 'Xe chiếm hàng 7, tấn công các tốt c7 và f7.',
+      '27': 'Cuối cùng Tượng g7 bị đổi: Vua đen mất quân bảo vệ quan trọng nhất của các ô đen.',
+      '29': 'Hậu chiếm ô f6 sát Vua đen. Trắng có ưu thế lớn nhưng chưa có đòn kết thúc trực tiếp.',
+      '31':
+        'Cuộc hành quân bắt đầu! Đen không còn quân nào có thể chiếu Vua trắng, nên Vua trắng có thể tự do tiến lên tham gia tấn công.',
+      '32': 'Vua tới g3. Các quân đen bị trói hoàn toàn: Xe f8 phải giữ f7, Hậu c6 phải giữ c7.',
+      '33': 'Vua tới f4, chỉ còn cách đích hai bước.',
+      '34':
+        'Đích đến! Vua g5 chuẩn bị Kh6 rồi Qg7#. Đen không thể ngăn cản kế hoạch này, Timman đầu hàng.',
+    },
+    keyMoments: ['23', '29', '31', '34'],
+    lessons: [
+      'Khi đối phương không còn khả năng chiếu, Vua có thể trở thành quân tấn công ngay cả ở trung cuộc.',
+      'Đổi quân phòng thủ chủ chốt (Tượng g7) để lại những lỗ hổng chết người quanh Vua.',
+      'Xe trên hàng 7 trói buộc đối phương, tạo thời gian cho những kế hoạch táo bạo.',
+      'Trước mỗi nước đi hãy hỏi: đối phương có thể làm gì? Nếu câu trả lời là "gần như không gì", bạn có thể thực hiện một kế hoạch chậm nhưng chắc.',
+    ],
+    tags: ['Tấn công Vua', 'Chiến lược'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1124533',
+  },
+
+  // ------------------------------------------------------------------ 1994
+  {
+    id: 'shirov-polgar-1994',
+    title: 'Shirov – Polgar (1994): Vũ điệu của những chú Mã',
+    white: 'Alexei Shirov',
+    black: 'Judit Polgar',
+    event: 'Giải chủ đề Phòng thủ Sicilia, Buenos Aires',
+    year: 1994,
+    result: '0-1',
+    opening: 'Phòng thủ Sicilia – biến Taimanov (Sicilian Defence, Taimanov Variation)',
+    difficulty: 4,
+    context:
+      'Năm 1994, Buenos Aires tổ chức một giải đấu đặc biệt: mọi ván cờ đều phải bắt đầu bằng Phòng thủ Sicilia. Judit Polgar, khi ấy 18 tuổi và đã là nữ kỳ thủ mạnh nhất thế giới, cầm quân Đen gặp Alexei Shirov – một trong những kỳ thủ tấn công đáng sợ nhất thời bấy giờ. Polgar giành chiến thắng chỉ sau 29 nước bằng một chuỗi thí tốt táo bạo.',
+    summary:
+      'Shirov tấn công sớm bằng 6.g4 và 9.f4, nhưng Polgar đáp trả bằng 10...g5!!, thí tốt để giành ô e5 cho Mã. Tiếp đó 13...h5! thí thêm một tốt để mở ô f5 cho Mã thứ hai. Hai Mã đen nhảy vào e3 rồi c2, thắng Xe a1 của Trắng; sau 20...b3! Mã a1 thoát ra ngoài và Đen nắm chắc ưu thế chất. Ván đấu kết thúc với thắng lợi của Polgar ở nước 29.',
+    moves: '1.e4 c5 2.Nf3 e6 3.d4 cxd4 4.Nxd4 Nc6 5.Nc3 d6 6.g4 a6 7.Be3 Nge7 8.Nb3 b5 9.f4 Bb7 10.Qf3 g5 11.fxg5 Ne5 12.Qg2 b4 13.Ne2 h5 14.gxh5 Nf5 15.Bf2 Qxg5 16.Na5 Ne3 17.Qg3 Qxg3 18.Nxg3 Nxc2+ 19.Kd1 Nxa1 20.Nxb7 b3 21.axb3 Nxb3 22.Kc2 Nc5 23.Nxc5 dxc5 24.Be1 Nf3 25.Bc3 Nd4+ 26.Kd3 Bd6 27.Bg2 Be5 28.Kc4 Ke7 29.Ra1 Nc6',
+    annotations: {
+      '6': 'Trắng tấn công sớm bằng tốt g4 – vũ khí sắc bén chống lại các cấu trúc tốt e6–d6.',
+      '7...': 'Mã g8 đi e7 – cách triển khai linh hoạt, từ đây Mã có thể sang g6 hoặc f5.',
+      '9': 'Trắng tiếp tục dồn tốt ở cánh Vua: f4 cùng g4 đe dọa đẩy tiếp g5 hoặc f5.',
+      '10...':
+        'Đòn thí tốt táo bạo! Sau 11.fxg5, Mã c6 nhảy vào e5 với tiến độ đánh Hậu f3 và chiếm ô trung tâm này một cách vững chắc.',
+      '12...': 'Tốt b4 đuổi Mã c3 khỏi trung tâm, khiến Mã e5 càng thêm vững.',
+      '13...':
+        'Thí thêm một tốt! Sau 14.gxh5, Mã e7 có ô f5 tuyệt vời. Nếu Trắng ăn Mã bằng exf5, đường chéo dài mở ra và Tượng b7 sẽ ăn Hậu g2.',
+      '15...': 'Hậu ăn lại tốt g5 và đối mặt với Hậu trắng trên cột g.',
+      '16': 'Shirov phản công vào Tượng b7, nhưng đã quá muộn.',
+      '16...': 'Mã nhảy vào e3, tấn công Hậu g2 và đe dọa chĩa đôi ở c2.',
+      '18...': 'Mã ăn tốt c2 kèm chiếu, đồng thời tấn công Xe a1.',
+      '20': 'Trắng lấy được Tượng b7, và Mã đen ở a1 có vẻ bị nhốt trong góc.',
+      '20...': 'Nước đi tinh tế: tốt b3 mở đường cho Mã a1 thoát ra ngoài qua ô b3.',
+      '22...': 'Mã đã thoát, và Đen hơn chất (Xe đổi lấy Tượng).',
+      '25...': 'Mã chiếu và chiếm ô d4 ở trung tâm.',
+      '29...': 'Các quân đen hoạt động tối đa, Đen hơn chất và Trắng không còn hy vọng. Ván cờ kết thúc với thắng lợi của Polgar.',
+    },
+    keyMoments: ['10...', '13...', '16...', '20...'],
+    lessons: [
+      'Thí tốt để giành những ô trung tâm cho Mã (e5, f5) là một ý tưởng chiến lược sâu sắc.',
+      'Mã ở tiền đồn vững chắc mạnh không kém một Tượng hay thậm chí một Xe.',
+      'Hãy luôn để ý những đòn chĩa đôi của Mã, đặc biệt nhắm vào Vua và Xe ở góc.',
+      'Một quân tưởng như bị nhốt (Mã a1) có thể được giải cứu bằng một nước tốt đúng lúc.',
+    ],
+    orientation: 'black',
+    tags: ['Cờ nữ', 'Thí quân', 'Chiến thuật'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1111195',
+  },
+
+  // ------------------------------------------------------------------ 1995
+  {
+    id: 'kasparov-anand-1995-van-10',
+    title: 'Kasparov – Anand, ván 10 (1995): Đòn thí Xe chuẩn bị tại nhà',
+    white: 'Garry Kasparov',
+    black: 'Viswanathan Anand',
+    event: 'Trận tranh ngôi vô địch thế giới PCA, New York',
+    year: 1995,
+    result: '1-0',
+    opening: 'Khai cuộc Tây Ban Nha – biến Mở (Ruy Lopez, Open Variation)',
+    difficulty: 5,
+    context:
+      'Trận tranh ngôi PCA năm 1995 diễn ra trên tầng 107 của Trung tâm Thương mại Thế giới ở New York. Sau tám ván hòa liên tiếp, Viswanathan Anand thắng ván 9 và vượt lên dẫn trước. Ngay ván sau, Kasparov đáp trả bằng một ý tưởng khai cuộc được ông cùng các trợ lý phân tích suốt cuối tuần; chính Kasparov thừa nhận chiến thắng này chủ yếu đến từ khâu chuẩn bị ở nhà.',
+    summary:
+      'Anand lặp lại biến Mở của khai cuộc Tây Ban Nha và Kasparov đã chờ sẵn. Ông thí tốt bằng 14.Bc2 rồi thí luôn cả Xe a1 sau 17.Qg4!, đổi lấy thế tấn công vào Vua đen bị kẹt ở trung tâm. Anand tìm được cách đổi Hậu, nhưng phải vào một tàn cuộc kém một tốt, nơi Xe và Tượng trắng hoạt động vượt trội. Kasparov thắng ở nước 38 và cân bằng tỷ số 5–5.',
+    moves: '1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Nxe4 6.d4 b5 7.Bb3 d5 8.dxe5 Be6 9.Nbd2 Nc5 10.c3 d4 11.Ng5 dxc3 12.Nxe6 fxe6 13.bxc3 Qd3 14.Bc2 Qxc3 15.Nb3 Nxb3 16.Bxb3 Nd4 17.Qg4 Qxa1 18.Bxe6 Rd8 19.Bh6 Qc3 20.Bxg7 Qd3 21.Bxh8 Qg6 22.Bf6 Be7 23.Bxe7 Qxg4 24.Bxg4 Kxe7 25.Rc1 c6 26.f4 a5 27.Kf2 a4 28.Ke3 b4 29.Bd1 a3 30.g4 Rd5 31.Rc4 c5 32.Ke4 Rd8 33.Rxc5 Ne6 34.Rd5 Rc8 35.f5 Rc4+ 36.Ke3 Nc5 37.g5 Rc1 38.Rd6',
+    annotations: {
+      '5...': 'Biến Mở: Đen ăn ngay tốt e4, chấp nhận một thế cờ sắc bén để có quân hoạt động.',
+      '9': 'Mã d2 tấn công Mã e4, buộc nó lùi về c5.',
+      '11': 'Nước đi sắc bén mà Karpov từng dùng với Korchnoi trong trận tranh ngôi năm 1978: Mã g5 lao vào Tượng e6.',
+      '14':
+        'Khác với 14.Nf3 của Karpov năm 1978, Kasparov chọn 14.Bc2, để Hậu đen ăn tốt c3. Đây là khởi đầu cho ý tưởng đã được chuẩn bị tại nhà.',
+      '15': 'Mã b3 – quân cờ sẵn sàng hy sinh để đổi lấy thời gian. Sau khi đổi Mã, Hậu đen có đường tới Xe a1.',
+      '17':
+        'Thí Xe! Hậu g4 tấn công tốt e6 và g7, mặc cho Hậu đen ăn Xe a1. Vua đen vẫn kẹt ở e8 trong khi các quân trắng ào tới.',
+      '17...': 'Anand chấp nhận ăn Xe.',
+      '18': 'Tượng ăn tốt e6, chiếm vị trí sát Vua đen; Đen không thể nhập thành.',
+      '19': 'Thêm một quân lao vào trận: Tượng h6 tấn công tốt g7 và hướng tới Xe h8.',
+      '21': 'Tượng ăn Xe h8, Trắng lấy lại phần lớn vật chất đã thí.',
+      '23...': 'Đen đổi Hậu để thoát khỏi thế bị tấn công.',
+      '24...': 'Tàn cuộc: Trắng hơn một tốt (năm tốt chống bốn), và Xe trắng hoạt động mạnh hơn hẳn.',
+      '25': 'Xe chiếm cột c, tấn công tốt c7.',
+      '27': 'Vua trắng tiến ra trung tâm để hỗ trợ các tốt.',
+      '30': 'Các tốt e, f, g của Trắng bắt đầu cuộc tiến quân.',
+      '33': 'Trắng ăn thêm tốt c5, giờ hơn hai tốt.',
+      '38': 'Xe d6 hỗ trợ các tốt e và f tiến lên; Đen không thể chống đỡ. Anand đầu hàng.',
+    },
+    keyMoments: ['14', '17', '24...', '38'],
+    lessons: [
+      'Chuẩn bị khai cuộc sâu có thể quyết định cả ván đấu ở trình độ cao nhất.',
+      'Thí vật chất để giữ Vua đối phương ở trung tâm thường đáng giá hơn số quân bỏ ra.',
+      'Đổi Hậu không phải lúc nào cũng cứu được bên phòng thủ: tàn cuộc kém tốt với quân thụ động vẫn rất khó giữ.',
+      'Trong tàn cuộc, Vua hoạt động và nhóm tốt đông hơn ở một cánh là chìa khóa chiến thắng.',
+    ],
+    tags: ['Tranh ngôi vô địch', 'Khai cuộc', 'Thí quân'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1018625',
+  },
+
+  // ------------------------------------------------------------------ 1996
+  {
+    id: 'deep-blue-kasparov-1996-van-1',
+    title: 'Deep Blue – Kasparov, ván 1 (1996): Lần đầu máy tính thắng nhà vô địch',
+    white: 'Deep Blue (IBM)',
+    black: 'Garry Kasparov',
+    event: 'Trận đấu Kasparov – Deep Blue, Philadelphia',
+    year: 1996,
+    result: '1-0',
+    opening: 'Phòng thủ Sicilia – biến Alapin (Sicilian Defence, Alapin Variation)',
+    difficulty: 3,
+    context:
+      'Tháng 2 năm 1996, siêu máy tính Deep Blue của IBM đấu sáu ván với nhà vô địch thế giới Garry Kasparov ở Philadelphia. Ngay ván đầu tiên, Deep Blue giành chiến thắng – lần đầu tiên một máy tính đánh bại nhà vô địch thế giới đương nhiệm trong một ván cờ với thời gian thi đấu tiêu chuẩn. Kasparov lấy lại thế trận và thắng chung cuộc 4–2, nhưng một năm sau ông thua trận tái đấu.',
+    summary:
+      'Deep Blue chọn biến Alapin và chơi với tốt d4 cô lập. Sau khi máy tính đổi Tượng lấy Mã f6, cấu trúc tốt cánh Vua đen bị phá vỡ. Kasparov tìm phản công bằng các tốt d và f, đẩy tốt f tới f3 và đưa Mã sâu vào trận địa Trắng. Nhưng Deep Blue tính toán chính xác: nó bình thản ăn tốt rồi phản công trước, và Vua đen bị săn đuổi. Kasparov đầu hàng ở nước 37.',
+    moves: '1.e4 c5 2.c3 d5 3.exd5 Qxd5 4.d4 Nf6 5.Nf3 Bg4 6.Be2 e6 7.h3 Bh5 8.O-O Nc6 9.Be3 cxd4 10.cxd4 Bb4 11.a3 Ba5 12.Nc3 Qd6 13.Nb5 Qe7 14.Ne5 Bxe2 15.Qxe2 O-O 16.Rac1 Rac8 17.Bg5 Bb6 18.Bxf6 gxf6 19.Nc4 Rfd8 20.Nxb6 axb6 21.Rfd1 f5 22.Qe3 Qf6 23.d5 Rxd5 24.Rxd5 exd5 25.b3 Kh8 26.Qxb6 Rg8 27.Qc5 d4 28.Nd6 f4 29.Nxb7 Ne5 30.Qd5 f3 31.g3 Nd3 32.Rc7 Re8 33.Nd6 Re1+ 34.Kh2 Nxf2 35.Nxf7+ Kg7 36.Ng5+ Kh6 37.Rxh7+',
+    annotations: {
+      '2': 'Biến Alapin: tốt c3 chuẩn bị d4 để lập trung tâm tốt.',
+      '3...': 'Đen ăn lại bằng Hậu – Hậu đứng ở d5 khá vững vì Trắng không thể đuổi nó bằng Nc3 (ô c3 đã có tốt).',
+      '10': 'Sau các nước đổi, Trắng có tốt d4 cô lập: vừa là điểm yếu, vừa cho Trắng không gian và ô e5 cho Mã.',
+      '14': 'Mã nhảy vào e5 – tiền đồn quen thuộc trong thế tốt cô lập.',
+      '18': 'Đổi Tượng lấy Mã f6, phá vỡ cấu trúc tốt cánh Vua đen.',
+      '18...': 'Kasparov chấp nhận tốt chồng ở cột f, đổi lại có cột g nửa mở cho Xe.',
+      '23': 'Trắng giải phóng tốt cô lập: d5 buộc đổi quân, và giờ chính Đen có tốt d5 cô lập.',
+      '26': 'Máy tính bình thản ăn tốt b6 dù Đen đang chuẩn bị phản công trên cột g.',
+      '28': 'Mã d6 tấn công các tốt b7 và f5.',
+      '29': 'Lại ăn tốt! Một kỳ thủ con người có thể e ngại thế tấn công của Đen, nhưng Deep Blue tin vào tính toán của mình.',
+      '30...': 'Tốt f3 cùng Xe g8 đe dọa ...Rxg2+. Trắng phải đáp lại bằng 31.g3 để chặn cột g.',
+      '32': 'Xe xâm nhập c7, tấn công tốt f7 và chuẩn bị phản công vào Vua đen.',
+      '34...': 'Mã ăn tốt f2, nhưng Trắng đã đi trước một nhịp.',
+      '35': 'Mã ăn f7 kèm chiếu – cuộc săn Vua đen bắt đầu.',
+      '37':
+        'Xe ăn h7 kèm chiếu. Vua đen chỉ còn ô g6, và sau 37...Kg6 38.Qg8+ Kf5 39.Nxf3, Trắng sẽ thắng lớn về vật chất. Kasparov đầu hàng.',
+    },
+    keyMoments: ['18', '23', '29', '35', '37'],
+    lessons: [
+      'Tốt cô lập không chỉ là điểm yếu: nó cho không gian, tiền đồn e5 và cơ hội đột phá d5.',
+      'Khi hai bên cùng tấn công, đếm nhịp chính xác quan trọng hơn cảm giác "nguy hiểm".',
+      'Máy tính không sợ hãi: nó ăn vật chất khi tính được rằng mình an toàn – hãy học cách tính toán cụ thể thay vì đánh giá theo cảm tính.',
+      'Vua có cấu trúc tốt bị phá vỡ là mục tiêu cho phản công, kể cả khi chính bên đó đang tấn công.',
+    ],
+    tags: ['Máy tính', 'Chiến thuật'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1070874',
+  },
+
+  // ------------------------------------------------------------------ 1998
+  {
+    id: 'topalov-shirov-1998',
+    title: 'Topalov – Shirov (1998): Nước đi 47...Bh3!!',
+    white: 'Veselin Topalov',
+    black: 'Alexei Shirov',
+    event: 'Giải Linares',
+    year: 1998,
+    result: '0-1',
+    opening: 'Phòng thủ Grünfeld – biến Đổi quân (Grünfeld Defence, Exchange Variation)',
+    difficulty: 4,
+    context:
+      'Linares 1998 là một trong những giải đấu mạnh nhất năm với sự góp mặt của Kasparov, Anand, Kramnik và nhiều siêu đại kiện tướng khác. Trong ván gặp Veselin Topalov, Alexei Shirov tạo ra nước đi tàn cuộc 47...Bh3!! – được John Emms xếp hạng nhất trong cuốn sách về những nước cờ đáng kinh ngạc nhất mọi thời đại.',
+    summary:
+      'Sau một trung cuộc phức tạp với nhiều đòn đổi quân, hai bên đi vào tàn cuộc Tượng khác màu, Đen hơn hai tốt – loại tàn cuộc vốn nổi tiếng dễ hòa. Vấn đề là Tượng đen ở f5 đang chắn đường Vua đen. Nước 47...Bh3!! thí luôn Tượng để dọn đường mà không mất nhịp: Vua đen tới e4 trước khi Vua trắng kịp chặn, và hai tốt thông a và d cách xa nhau khiến Tượng trắng không thể ngăn cả hai.',
+    moves: '1.d4 Nf6 2.c4 g6 3.Nc3 d5 4.cxd5 Nxd5 5.e4 Nxc3 6.bxc3 Bg7 7.Bb5+ c6 8.Ba4 O-O 9.Ne2 Nd7 10.O-O e5 11.f3 Qe7 12.Be3 Rd8 13.Qc2 Nb6 14.Bb3 Be6 15.Rad1 Nc4 16.Bc1 b5 17.f4 exd4 18.Nxd4 Bg4 19.Rde1 Qc5 20.Kh1 a5 21.h3 Bd7 22.a4 bxa4 23.Ba2 Be8 24.e5 Nb6 25.f5 Nd5 26.Bd2 Nb4 27.Qxa4 Nxa2 28.Qxa2 Bxe5 29.fxg6 hxg6 30.Bg5 Rd5 31.Re3 Qd6 32.Qe2 Bd7 33.c4 Bxd4 34.cxd5 Bxe3 35.Qxe3 Re8 36.Qc3 Qxd5 37.Bh6 Re5 38.Rf3 Qc5 39.Qa1 Bf5 40.Re3 f6 41.Rxe5 Qxe5 42.Qa2+ Qd5 43.Qxd5+ cxd5 44.Bd2 a4 45.Bc3 Kf7 46.h4 Ke6 47.Kg1 Bh3 48.gxh3 Kf5 49.Kf2 Ke4 50.Bxf6 d4 51.Be7 Kd3 52.Bc5 Kc4 53.Be7 Kb3',
+    annotations: {
+      '5': 'Biến Đổi quân của Grünfeld: Trắng có trung tâm tốt lớn, còn Đen sẽ tấn công nó bằng Tượng g7 và các đòn đẩy tốt.',
+      '10...': 'Đen đánh vào trung tâm bằng e5.',
+      '17': 'Trắng đẩy f4 để mở cột f, tìm kiếm thế tấn công cánh Vua.',
+      '24': 'Trắng tiến tốt e5 rồi f5, cố gắng phá vỡ cánh Vua đen.',
+      '28...': 'Đen đổi Mã lấy Tượng a2 và ăn lại tốt e5.',
+      '33...': 'Một chuỗi đổi quân phức tạp: sau 34.cxd5 Bxe3 35.Qxe3, Đen hơn một tốt và sắp ăn thêm tốt d5.',
+      '36...': 'Hậu ăn tốt d5 – Đen hơn hai tốt.',
+      '43...':
+        'Đổi Hậu: tàn cuộc Tượng khác màu, Đen hơn hai tốt. Thông thường những tàn cuộc như vậy rất dễ hòa vì Tượng có thể chặn tốt trên những ô mà Tượng đối phương không kiểm soát.',
+      '46...': 'Vua đen tiến tới e6, nhưng Tượng f5 lại đang chắn ô f5 trên đường tới e4.',
+      '47': 'Vua trắng chuẩn bị Kf2–e3 để chặn tốt d. Nếu Vua trắng kịp tới e3, thế cờ sẽ rất gần với hòa.',
+      '47...':
+        'Nước đi kinh điển! Tượng tự thí ở h3 để dọn ô f5 cho Vua mà không mất nhịp: Trắng phải dùng một nước để ăn Tượng (hoặc để mất tốt g2), trong khi Vua đen lập tức lên f5.',
+      '48': 'Topalov ăn Tượng. Trắng hơn một quân, nhưng các tốt h chồng của Trắng không có giá trị.',
+      '48...': 'Vua đen chiếm ngay ô f5 mà Tượng vừa nhường lại.',
+      '49...': 'Vua tới e4, tiếp sức cho tốt d. Vua trắng ở f2 bị cắt khỏi các ô e3 và f3.',
+      '50': 'Trắng ăn tốt f6 nhưng không thể cùng lúc ngăn cả hai tốt thông a và d.',
+      '53...':
+        'Vua đen tới b3 hỗ trợ tốt a. Hai tốt thông cách xa nhau là quá sức với một Tượng, còn Vua trắng ở quá xa. Topalov đầu hàng.',
+    },
+    keyMoments: ['43...', '47...', '49...', '53...'],
+    lessons: [
+      'Trong tàn cuộc, hoạt động của Vua thường quan trọng hơn cả một quân Tượng.',
+      'Tàn cuộc Tượng khác màu thường hòa, nhưng hai tốt thông cách xa nhau có thể phá vỡ quy luật đó.',
+      'Hãy tìm cách dọn đường cho quân của mình mà không mất nhịp – kể cả bằng một đòn thí bất ngờ.',
+      'Tính toán cuộc đua giữa hai Vua theo từng nhịp là kỹ năng cốt lõi của tàn cuộc.',
+    ],
+    orientation: 'black',
+    tags: ['Tàn cuộc', 'Thí quân'],
+    source: 'https://www.chessgames.com/perl/chessgame?gid=1143956',
+  },
+];
