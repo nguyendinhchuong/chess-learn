@@ -138,17 +138,7 @@ export function useReveal(root: React.RefObject<HTMLElement>, deps: unknown[] = 
   }, deps);
 }
 
-export function useMedia(query: string) {
-  const [match, setMatch] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
-  useEffect(() => {
-    const m = window.matchMedia(query);
-    const on = () => setMatch(m.matches);
-    on();
-    m.addEventListener('change', on);
-    return () => m.removeEventListener('change', on);
-  }, [query]);
-  return match;
-}
+export { useMedia } from '../lib/media';
 
 /**
  * Tiến độ một khối đi qua màn hình: 0 khi mép trên khối chạm vạch `a` (tỉ lệ chiều cao cửa sổ),

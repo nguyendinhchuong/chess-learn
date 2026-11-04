@@ -775,13 +775,13 @@ a.ld-switch-item:hover {
   dominant-baseline: middle;
   opacity: 0.75;
 }
+/* bóng mềm vẽ bằng dải chuyển màu: 32 lớp có filter: blur phải làm mờ lại mỗi khung hình, rất nặng trên điện thoại */
 .ld-shadow {
   position: absolute;
   left: 0;
   top: 0;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  filter: blur(3px);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7) 55%, rgba(0, 0, 0, 0.35) 80%, rgba(0, 0, 0, 0));
   will-change: transform, opacity;
 }
 .ld-pieces {
@@ -801,6 +801,10 @@ a.ld-switch-item:hover {
 }
 .ld-scene.xq .ld-piece {
   transform-origin: 50% 50%;
+}
+/* mặt chữ xoay theo bàn trên lớp riêng (Scene ghi transform), không phải vẽ lại quân */
+.ld-scene .ld-disc-face {
+  will-change: transform;
 }
 .ld-sprite {
   display: block;

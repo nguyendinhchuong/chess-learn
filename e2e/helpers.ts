@@ -13,6 +13,8 @@ export function trackErrors(page: Page): string[] {
 
 /** Cuộn trang xuống tận cùng bằng con lăn chuột, như người dùng thật */
 export async function scrollToBottom(page: Page) {
+  // điện thoại: đóng hộp thoại bàn cờ trước, như người học đóng bàn cờ rồi đọc tiếp
+  await closeBoardSheet(page);
   const vp = page.viewportSize()!;
   await page.mouse.move(vp.width * 0.3, vp.height * 0.5);
   for (let i = 0; i < 200; i++) {
@@ -54,9 +56,36 @@ export async function expectStepCounterValid(page: Page) {
   }
 }
 
+/** Màn hình hẹp: bàn cờ bài học là hộp thoại (BoardSheet) thay vì cột bên cạnh/phía trên bài */
+export async function isBoardSheet(page: Page) {
+  return (await page.locator('.board-sheet').count()) > 0;
+}
+
+/** Đóng hộp thoại bàn cờ nếu đang mở; trang phải giữ nguyên chỗ đang đọc */
+export async function closeBoardSheet(page: Page) {
+  if (!(await page.locator('.board-sheet.open').count())) return;
+  const y = await page.evaluate(() => window.scrollY);
+  await page.getByRole('button', { name: 'Đóng bàn cờ' }).click();
+  await expect(page.locator('.board-sheet.open')).toHaveCount(0);
+  await page.waitForTimeout(450); // hộp thoại trượt xuống xong
+  expect(await page.evaluate(() => window.scrollY), 'đóng bàn cờ không được cuộn trang').toBe(y);
+}
+
 /** Đưa sơ đồ của phần thứ `i` lên bàn cờ (bấm vào tiêu đề phần) và chờ bàn cờ hiển thị nó */
 export async function showSection(page: Page, i: number) {
   const section = page.locator('.lesson-section').nth(i);
+  if (await isBoardSheet(page)) {
+    // màn hình hẹp: mở bàn cờ trong hộp thoại ngay tại phần đó – trang không được cuộn đi đâu
+    await closeBoardSheet(page);
+    await section.getByRole('button', { name: /Xem trên bàn cờ/ }).scrollIntoViewIfNeeded();
+    const y = await page.evaluate(() => window.scrollY);
+    await section.getByRole('button', { name: /Xem trên bàn cờ/ }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('dialog').locator('h2')).toHaveText(await section.locator('h2').innerText().then((t) => t.replace(/^\d+\s*/, '')));
+    await page.waitForTimeout(450); // hộp thoại trượt lên xong
+    expect(await page.evaluate(() => window.scrollY), 'mở bàn cờ không được cuộn trang').toBe(y);
+    return;
+  }
   await section.locator('h2').click();
   await expect(section.getByText(/Đang hiển thị trên bàn cờ/)).toBeVisible();
   await waitScrollSettled(page);

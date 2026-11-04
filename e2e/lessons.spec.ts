@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ALL_LESSONS } from '../src/data/lessons';
-import { expectPageAlive, expectStepCounterValid, scrollToBottom, scrollToTop, showSection, trackErrors } from './helpers';
+import { closeBoardSheet, expectPageAlive, expectStepCounterValid, isBoardSheet, scrollToBottom, scrollToTop, showSection, trackErrors } from './helpers';
 
 const isWide = (w: number) => w > 1100;
 
@@ -27,8 +27,13 @@ test.describe('Bài học – cuộn trang sau khi xem hết nước đi', () =>
 
     await expectPageAlive(page, errors);
     await expectStepCounterValid(page);
-    await expect(page.locator('.board-col .board')).toBeVisible();
     await expect(page.getByRole('heading', { name: /Ghi nhớ/ })).toBeVisible();
+    // điện thoại: bàn cờ đã đóng khi cuộn – mở lại phần đó thì vẫn ở đúng nước đã xem
+    if (await isBoardSheet(page)) {
+      await showSection(page, 4);
+      await expect(page.locator('.board-col .step-counter')).toHaveText('Nước 9/9');
+    }
+    await expect(page.locator('.board-col .board')).toBeVisible();
   });
 
   test('lỗi đã báo: chuyển trực tiếp từ sơ đồ 9/9 sang sơ đồ 8 nước', async ({ page }) => {
@@ -82,6 +87,7 @@ test.describe('Bài học – chuyển bài', () => {
     await showSection(page, lastWithDiagram);
     const end = page.locator('.board-col button[title="Đến cuối"]');
     if (await end.count() && (await end.isEnabled())) await end.click();
+    await closeBoardSheet(page);
     await page.getByRole('button', { name: /Bài tiếp/ }).click();
     await expect(page.locator('main h1')).toHaveText(to.title);
     if (viewport && isWide(viewport.width)) await scrollToBottom(page);

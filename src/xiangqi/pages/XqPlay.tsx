@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { XqBoard, XqPieceFace, BoardArrow } from '../components/XqBoard';
 import { XqMoveList, XqSan, playXqMoveSound } from '../components/xqCommon';
-import { EvalBar, MoveMark, RichText, WinBar } from '../../components/common';
+import { BotStep, EvalBar, MoveMark, RichText, StartBar, WinBar } from '../../components/common';
 import { BOTS, BotProfile } from '../engine/bots';
 import { Position, START_FEN, GameStatus, Color, KING, PIECE_VI, sqX, fileNumber, parseSq } from '../engine/board';
 import { requestAnalysis, requestBotMove, cancelBot, cancelAnalysis } from '../engine/client';
@@ -122,7 +122,7 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
   };
 
   return (
-    <div>
+    <div className="setup">
       <div className="page-head">
         <h1>🎯 Luyện tập cờ tướng với máy</h1>
         <p>Chọn đối thủ phù hợp với trình độ. Ở chế độ Huấn luyện, Thầy Cú 🦉 sẽ chấm từng nước đi cờ tướng của bạn, chỉ ra nước mạnh – nước yếu, cảnh báo nguy hiểm và dự đoán đối thủ sẽ đi gì tiếp theo.</p>
@@ -143,24 +143,7 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
         </div>
       )}
 
-      <h3>1. Chọn đối thủ</h3>
-      <div className="bot-grid">
-        {BOTS.map((b) => {
-          const s = stats[b.level];
-          return (
-            <button key={b.level} className={'bot-card' + (level === b.level ? ' active' : '')} style={{ ['--bot-color' as any]: b.color }} onClick={() => setLevel(b.level)}>
-              <span className="lvl">CẤP {b.level}</span>
-              <div className="bot-avatar">{b.avatar}</div>
-              <h3>{b.name}</h3>
-              <div className="elo">
-                {b.title} · ~{b.elo} Elo
-              </div>
-              <p>{b.description}</p>
-              <div className="record">{s ? `Thành tích: ${s.win} thắng · ${s.draw} hòa · ${s.loss} thua` : 'Chưa đấu lần nào'}</div>
-            </button>
-          );
-        })}
-      </div>
+      <BotStep bots={BOTS} level={level} stats={stats} onPick={setLevel} />
 
       <div className="grid cols-2" style={{ marginTop: 26 }}>
         <div className="card">
@@ -168,13 +151,13 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
           <div className="choice-row">
             {(
               [
-                ['w', 'Đỏ (đi trước)'],
+                ['w', 'Đỏ (đi\u00a0trước)'],
                 ['random', 'Ngẫu nhiên'],
                 ['b', 'Đen'],
               ] as const
             ).map(([k, label]) => (
-              <button key={k} className={'choice' + (color === k ? ' active' : '')} onClick={() => setColor(k)}>
-                {k !== 'random' ? <KingIcon red={k === 'w'} /> : <span style={{ fontSize: 26 }}>🎲</span>}
+              <button key={k} className={'choice' + (color === k ? ' active' : '')} aria-pressed={color === k} onClick={() => setColor(k)}>
+                {k !== 'random' ? <KingIcon red={k === 'w'} /> : <span className="choice-ic" style={{ fontSize: 26 }}>🎲</span>}
                 {label}
               </button>
             ))}
@@ -200,14 +183,14 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
         <div className="card">
           <h3>3. Chế độ chơi</h3>
           <div className="choice-row">
-            <button className={'choice' + (mode === 'coach' ? ' active' : '')} onClick={() => setMode('coach')}>
-              🦉 Huấn luyện
+            <button className={'choice' + (mode === 'coach' ? ' active' : '')} aria-pressed={mode === 'coach'} onClick={() => setMode('coach')}>
+              <span className="choice-ic" aria-hidden="true">🦉</span> Huấn luyện
             </button>
-            <button className={'choice' + (mode === 'match' ? ' active' : '')} onClick={() => setMode('match')}>
-              ⚔️ Thi đấu
+            <button className={'choice' + (mode === 'match' ? ' active' : '')} aria-pressed={mode === 'match'} onClick={() => setMode('match')}>
+              <span className="choice-ic" aria-hidden="true">⚔️</span> Thi đấu
             </button>
-            <button className={'choice' + (mode === 'custom' ? ' active' : '')} onClick={() => setMode('custom')}>
-              ⚙️ Tùy chỉnh
+            <button className={'choice' + (mode === 'custom' ? ' active' : '')} aria-pressed={mode === 'custom'} onClick={() => setMode('custom')}>
+              <span className="choice-ic" aria-hidden="true">⚙️</span> Tùy chỉnh
             </button>
           </div>
           <p className="small muted" style={{ marginTop: 10 }}>
@@ -253,14 +236,13 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
         </p>
       </details>
 
-      <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center' }}>
-        <button className="btn primary big" onClick={start}>
-          ▶ Bắt đầu ván đấu với {BOTS[level - 1].avatar} {BOTS[level - 1].name}
-        </button>
-      </div>
+      <StartBar bot={BOTS[level - 1]} details={`${COLOR_LABEL[color]} · ${MODE_LABEL[mode]}`} onStart={start} />
     </div>
   );
 }
+
+const COLOR_LABEL = { w: 'Quân Đỏ', b: 'Quân Đen', random: 'Ngẫu nhiên' };
+const MODE_LABEL = { coach: 'Huấn luyện', match: 'Thi đấu', custom: 'Tùy chỉnh' };
 
 function CoachToggles({ value, onChange }: { value: CoachSettings; onChange: (v: CoachSettings) => void }) {
   const items: [keyof CoachSettings, string, string][] = [

@@ -1,4 +1,6 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from '@phosphor-icons/react';
 import { playLine, START_FEN, PlayedLine, Position } from '../engine/board';
 import { explainPurpose, isCaptureAt } from '../engine/purpose';
 import type { BoardArrow } from './Board';
@@ -124,14 +126,18 @@ export function GuideBox({ stepKey, children, accent }: { stepKey: unknown; chil
       return;
     }
     const r = el.getBoundingClientRect();
-    const headerBottom = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0;
+    // trong hộp thoại bàn cờ (BoardSheet) thì cuộn hộp thoại, không cuộn trang phía sau
+    const sheet = el.closest<HTMLElement>('[data-sheet]');
+    const area = sheet?.getBoundingClientRect();
+    const top = area?.top ?? document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0;
+    const bottom = area?.bottom ?? window.innerHeight;
     // Tự tính khoảng cuộn (thay vì scrollIntoView, vốn có thể dừng sát/lố mép 1–2px trên điện thoại)
     // để khung lời giảng nằm trọn trong màn hình, cách mép dưới 12px và không bị thanh tiêu đề che.
     const gap = 12;
     let dy = 0;
-    if (r.bottom > window.innerHeight - gap) dy = r.bottom - (window.innerHeight - gap);
-    if (r.top - dy < headerBottom + gap) dy = r.top - (headerBottom + gap);
-    if (Math.abs(dy) >= 1) window.scrollBy({ top: Math.ceil(dy), behavior: 'smooth' });
+    if (r.bottom > bottom - gap) dy = r.bottom - (bottom - gap);
+    if (r.top - dy < top + gap) dy = r.top - (top + gap);
+    if (Math.abs(dy) >= 1) (sheet ?? window).scrollBy({ top: Math.ceil(dy), behavior: 'smooth' });
   }, [stepKey]);
   return (
     <div ref={ref} className={'note-box guide' + (accent ? ' accent' : '')} aria-live="polite" data-testid="guide">
@@ -139,6 +145,60 @@ export function GuideBox({ stepKey, children, accent }: { stepKey: unknown; chil
         {children}
       </div>
     </div>
+  );
+}
+
+/**
+ * Bàn cờ của trang bài học trên màn hình hẹp: hộp thoại trượt lên từ mép dưới, mở ngay tại đoạn đang đọc.
+ * Đóng lại (✕, chạm vùng tối, Esc) là về đúng chỗ cũ – không phải cuộn lên đầu trang xem bàn cờ rồi cuộn xuống lại.
+ */
+export function BoardSheet({ open, onClose, no, title, children }: { open: boolean; onClose: () => void; no: number; title: string; children: ReactNode }) {
+  const root = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const close = useRef(onClose);
+  close.current = onClose;
+
+  useEffect(() => {
+    if (!open || !root.current) return;
+    // nút "Xem trên bàn cờ" vừa bấm: đóng hộp thoại thì trả tiêu điểm về đó
+    const back = document.activeElement as HTMLElement | null;
+    // trang phía sau đứng yên, không nhận chạm hay tiêu điểm (Tab không lọt ra sau hộp thoại)
+    document.documentElement.classList.add('sheet-lock');
+    const inerted: HTMLElement[] = [];
+    for (let n: HTMLElement | null = root.current; n && n !== document.body; n = n.parentElement) {
+      for (const s of Array.from(n.parentElement?.children ?? [])) {
+        if (s !== n && s instanceof HTMLElement && !s.inert) {
+          s.inert = true;
+          inerted.push(s);
+        }
+      }
+    }
+    panel.current?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.documentElement.classList.remove('sheet-lock');
+      inerted.forEach((s) => (s.inert = false));
+      document.removeEventListener('keydown', onKey);
+      back?.focus({ preventScroll: true });
+    };
+  }, [open]);
+
+  // gắn thẳng vào body: hiệu ứng hiện trang (translate) của khung ứng dụng không làm lệch vị trí cố định của hộp thoại
+  return createPortal(
+    <div ref={root} className={'board-col board-sheet' + (open ? ' open' : '')} aria-hidden={!open} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={panel} className="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabIndex={-1} data-sheet>
+        <div className="sheet-head">
+          <span className="sec-no">{no}</span>
+          <h2 id="sheet-title">{title}</h2>
+          <button type="button" className="icon-btn" aria-label="Đóng bàn cờ" onClick={onClose}>
+            <X size={16} weight="bold" aria-hidden="true" />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>,
+    document.body,
   );
 }
 

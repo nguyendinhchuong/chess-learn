@@ -76,6 +76,7 @@ export function Scene({ kind, cols, rows, pieces, rx, rz, fit, label, scatterRef
   const box = useRef<HTMLDivElement>(null);
   const plane = useRef<HTMLDivElement>(null);
   const els = useRef<(HTMLDivElement | null)[]>([]);
+  const faces = useRef<(HTMLElement | null)[]>([]);
   const shadows = useRef<(HTMLDivElement | null)[]>([]);
   const [u, setU] = useState(0);
   const inView = useInView(box, '80px 0px');
@@ -87,7 +88,16 @@ export function Scene({ kind, cols, rows, pieces, rx, rz, fit, label, scatterRef
     lift: new Float32Array(n),
     sx: new Float32Array(n).fill(1e4),
     sy: new Float32Array(n).fill(1e4),
+    z: new Float32Array(n),
     zi: new Int32Array(n),
+    order: Array.from({ length: n }, (_, i) => i),
+    // giá trị đã ghi lần trước: chỉ ghi lại khi đổi, để khung hình đứng yên gần như không tốn gì
+    tf: new Array<string>(n),
+    op: new Array<string>(n),
+    stf: new Array<string>(n),
+    sop: new Array<string>(n),
+    plane: '',
+    face: 1e4,
     t0: -1,
     rect: null as DOMRect | null,
     tilt: null as DOMRect | null,
@@ -132,8 +142,19 @@ export function Scene({ kind, cols, rows, pieces, rx, rz, fit, label, scatterRef
     }
     s.rx = reduced ? tx : approach(s.rx, tx, dt, 4);
     s.rz = reduced ? tz : approach(s.rz, tz, dt, 4);
-    plane.current.style.transform = `perspective(${P}px) rotateX(${s.rx}deg) rotateZ(${s.rz}deg)`;
-    if (box.current) box.current.style.setProperty('--face-rot', s.rz + 'deg');
+    const pt = `perspective(${P}px) rotateX(${s.rx.toFixed(3)}deg) rotateZ(${s.rz.toFixed(3)}deg)`;
+    if (pt !== s.plane) {
+      s.plane = pt;
+      plane.current.style.transform = pt;
+    }
+    // mặt chữ quân cờ tướng xoay theo bàn. Ghi thẳng vào từng mặt (mỗi mặt là một lớp riêng) chứ không đặt
+    // biến CSS trên khung: biến kế thừa buộc tính lại kiểu cho mọi phần tử bên trong ở mỗi khung hình,
+    // là phần nặng nhất trên điện thoại
+    if (kind === 'xq' && Math.abs(s.rz - s.face) > 0.2) {
+      s.face = s.rz;
+      const f = `rotate(${s.rz.toFixed(2)}deg)`;
+      for (const el of faces.current) if (el) el.style.transform = f;
+    }
 
     const a = (s.rx * Math.PI) / 180,
       z = (s.rz * Math.PI) / 180;
@@ -174,23 +195,47 @@ export function Scene({ kind, cols, rows, pieces, rx, rz, fit, label, scatterRef
         sy = Y * k;
       s.sx[i] = sx;
       s.sy[i] = sy;
-      const op = e * clamp(1 - sc * 1.15);
+      s.z[i] = Z;
+      let tf: string;
       if (kind === 'chess') {
         const spin = sc * (r1 - 0.5) * 140 + (s.lift[i] / u) * (r2 - 0.5) * 16;
-        el.style.transform = `translate3d(${sx - w / 2}px, ${sy - w * 0.92}px, 0) scale(${k}) rotate(${spin}deg)`;
+        tf = `translate3d(${(sx - w / 2).toFixed(2)}px, ${(sy - w * 0.92).toFixed(2)}px, 0) scale(${k.toFixed(4)}) rotate(${spin.toFixed(2)}deg)`;
       } else {
-        el.style.transform = `translate3d(${sx - w / 2}px, ${sy - w / 2}px, 0) scale(${k}) scaleY(${cosA})`;
+        tf = `translate3d(${(sx - w / 2).toFixed(2)}px, ${(sy - w / 2).toFixed(2)}px, 0) scale(${k.toFixed(4)}) scaleY(${cosA.toFixed(4)})`;
       }
-      el.style.opacity = String(op);
-      const zi = Math.round(Z + 2000);
-      if (zi !== s.zi[i]) {
-        s.zi[i] = zi;
-        el.style.zIndex = String(zi);
+      if (tf !== s.tf[i]) {
+        s.tf[i] = tf;
+        el.style.transform = tf;
+      }
+      const op = (e * clamp(1 - sc * 1.15)).toFixed(3);
+      if (op !== s.op[i]) {
+        s.op[i] = op;
+        el.style.opacity = op;
       }
       if (sh) {
         const h = lz / u;
-        sh.style.transform = `translate(${lx + (cols * u) / 2 - u * 0.4}px, ${ly + (rows * u) / 2 - u * 0.4}px) scale(${1 / (1 + h * 0.5)})`;
-        sh.style.opacity = String(e * clamp(1 - h * 0.35) * clamp(1 - sc * 1.4) * 0.55);
+        const stf = `translate(${(lx + (cols * u) / 2 - u * 0.4).toFixed(2)}px, ${(ly + (rows * u) / 2 - u * 0.4).toFixed(2)}px) scale(${(1 / (1 + h * 0.5)).toFixed(4)})`;
+        if (stf !== s.stf[i]) {
+          s.stf[i] = stf;
+          sh.style.transform = stf;
+        }
+        const sop = (e * clamp(1 - h * 0.35) * clamp(1 - sc * 1.4) * 0.55).toFixed(3);
+        if (sop !== s.sop[i]) {
+          s.sop[i] = sop;
+          sh.style.opacity = sop;
+        }
+      }
+    }
+
+    // quân gần mắt người xem nằm trên: chỉ ghi z-index khi thứ tự thật sự đổi chỗ, vì mỗi lần đổi
+    // z-index trình duyệt phải vẽ và tách lớp lại cả bàn
+    s.order.sort((a, b) => s.z[a] - s.z[b]);
+    for (let r = 0; r < n; r++) {
+      const i = s.order[r];
+      const el = els.current[i];
+      if (el && s.zi[i] !== r + 1) {
+        s.zi[i] = r + 1;
+        el.style.zIndex = String(r + 1);
       }
     }
   };
@@ -226,7 +271,15 @@ export function Scene({ kind, cols, rows, pieces, rx, rz, fit, label, scatterRef
       </div>
       <div className="ld-pieces">
         {pieces.map((p, i) => (
-          <div key={i} ref={(el) => (els.current[i] = el)} className="ld-piece" style={{ width: kind === 'chess' ? u * 1.04 : u * 0.9, height: kind === 'chess' ? u * 1.04 : u * 0.9, opacity: 0 }}>
+          <div
+            key={i}
+            ref={(el) => {
+              els.current[i] = el;
+              faces.current[i] = el?.querySelector<HTMLElement>('.ld-disc-face') ?? null;
+            }}
+            className="ld-piece"
+            style={{ width: kind === 'chess' ? u * 1.04 : u * 0.9, height: kind === 'chess' ? u * 1.04 : u * 0.9, opacity: 0 }}
+          >
             <PieceFace k={p.key} kind={kind} />
           </div>
         ))}

@@ -1,5 +1,8 @@
-import { Fragment, ReactNode, useEffect, useRef } from 'react';
+import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
+import { CaretDown } from '@phosphor-icons/react';
 import { PIECE_SVG } from '../assets/pieces';
+import { COMPACT } from '../lib/media';
+import type { BotStats } from '../lib/storage';
 
 /** Hiển thị nước đi SAN với hình quân thay cho chữ cái */
 export function San({ san, white = true }: { san: string; white?: boolean }) {
@@ -114,6 +117,139 @@ export function WinBar({ win, you, names = ['Trắng', 'Đen'], icons = ['⬜', 
       <div className="winbar-track">
         <div className="winbar-fill" style={{ transform: `scaleX(${w / 100})` }} />
       </div>
+    </div>
+  );
+}
+
+interface BotInfo {
+  level: number;
+  name: string;
+  title: string;
+  elo: number;
+  avatar: string;
+  color: string;
+  description: string;
+}
+
+/**
+ * Bước 1 của màn hình luyện tập: chọn đối thủ. Trên màn hình hẹp, chọn xong thì danh sách gập lại thành một dòng
+ * tóm tắt để bước chọn màu quân và chế độ nhích lên ngay bên dưới; chạm vào dòng đó để mở lại cả danh sách.
+ */
+export function BotStep({ bots, level, stats, onPick }: { bots: BotInfo[]; level: number; stats: Record<number, BotStats>; onPick: (level: number) => void }) {
+  const [open, setOpen] = useState(true);
+  const box = useRef<HTMLElement>(null);
+  const summary = useRef<HTMLButtonElement>(null);
+  const list = useRef<HTMLDivElement>(null);
+  // chỉ chuyển tiêu điểm và cuộn khi người dùng vừa gập/mở, không phải lúc trang mới hiện
+  const toggled = useRef(false);
+  const bot = bots[level - 1];
+
+  useEffect(() => {
+    if (!toggled.current) return;
+    toggled.current = false;
+    if (open) {
+      list.current?.querySelector<HTMLElement>('.bot-card.active')?.focus({ preventScroll: true });
+      return;
+    }
+    summary.current?.focus({ preventScroll: true });
+    // chọn đối thủ ở cuối danh sách thì tiêu đề bước 1 đã trôi khuất dưới thanh điều hướng: cuộn về
+    // để thấy đối thủ vừa chọn và bước chọn màu quân ngay bên dưới
+    const top = box.current?.getBoundingClientRect().top ?? 0;
+    const nav = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0;
+    if (top < nav) window.scrollBy({ top: top - nav - 12, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }, [open]);
+
+  const pick = (lv: number) => {
+    onPick(lv);
+    if (!window.matchMedia(COMPACT).matches) return;
+    toggled.current = true;
+    setOpen(false);
+  };
+
+  return (
+    <section ref={box} className="bot-step" style={{ ['--bot-color' as string]: bot.color }}>
+      <h3>1. Chọn đối thủ</h3>
+      <div className={'bot-fold bot-fold-pick' + (open ? ' off' : '')}>
+        <div>
+          <button
+            ref={summary}
+            type="button"
+            className="bot-pick"
+            aria-expanded={open}
+            aria-controls="bot-list"
+            aria-label={`Đổi đối thủ – đang chọn ${bot.name}, cấp ${bot.level}`}
+            onClick={() => {
+              toggled.current = true;
+              setOpen(true);
+            }}
+          >
+            <span className="bot-avatar" aria-hidden="true">
+              {bot.avatar}
+            </span>
+            <span className="bot-pick-text">
+              <b>{bot.name}</b>
+              <span>
+                Cấp {bot.level} · {bot.title} · ~{bot.elo} Elo
+              </span>
+            </span>
+            <span className="bot-pick-change">
+              Đổi
+              <CaretDown size={14} weight="bold" aria-hidden="true" />
+            </span>
+          </button>
+        </div>
+      </div>
+      <div className={'bot-fold' + (open ? '' : ' off')}>
+        <div ref={list} id="bot-list">
+          <div className="bot-grid">
+            {bots.map((b) => {
+              const s = stats[b.level];
+              return (
+                <button key={b.level} className={'bot-card' + (level === b.level ? ' active' : '')} aria-pressed={level === b.level} style={{ ['--bot-color' as string]: b.color }} onClick={() => pick(b.level)}>
+                  <span className="lvl">CẤP {b.level}</span>
+                  <div className="bot-avatar">{b.avatar}</div>
+                  <h3>{b.name}</h3>
+                  <div className="elo">
+                    {b.title} · ~{b.elo} Elo
+                  </div>
+                  <p>{b.description}</p>
+                  <div className={'record' + (s ? '' : ' none')}>{s ? `Thành tích: ${s.win} thắng · ${s.draw} hòa · ${s.loss} thua` : 'Chưa đấu lần nào'}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Nút bắt đầu ván ở màn hình chọn đối thủ. Màn hình rộng: nút nằm giữa cuối trang. Điện thoại và máy tính bảng:
+ * thanh nổi dính mép dưới, tóm tắt đối thủ, màu quân và chế độ đang chọn – vừa chạm vào đối thủ là thấy ngay
+ * bước tiếp theo, không phải cuộn xuống tìm nút.
+ */
+export function StartBar({ bot, details, onStart }: { bot: { level: number; name: string; avatar: string; color: string }; details: string; onStart: () => void }) {
+  return (
+    <div className="start-bar" style={{ ['--bot-color' as string]: bot.color }}>
+      <div className="start-bar-pick">
+        <span key={bot.level} className="bot-avatar" aria-hidden="true">
+          {bot.avatar}
+        </span>
+        <span className="start-bar-text">
+          <b>{bot.name}</b>
+          <span>{details}</span>
+        </span>
+      </div>
+      <button className="btn primary big" onClick={onStart}>
+        <span>
+          ▶ Bắt đầu
+          <span className="start-bar-long">
+            {' '}
+            ván đấu với {bot.avatar} {bot.name}
+          </span>
+        </span>
+      </button>
     </div>
   );
 }

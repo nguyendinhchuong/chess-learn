@@ -3,9 +3,10 @@ import { ALL_LESSONS, CATEGORY_INFO } from '../data/lessons';
 import type { Diagram } from '../data/types';
 import { Board } from '../components/Board';
 import { RichText, San, Stars } from '../components/common';
-import { parseArrows, parseHighlights, StepControls, useLine, useStepper, moveLabel, GuideBox, useMovePurpose, PurposeText } from '../components/LineViewer';
+import { parseArrows, parseHighlights, StepControls, useLine, useStepper, moveLabel, GuideBox, useMovePurpose, PurposeText, BoardSheet } from '../components/LineViewer';
 import { href, navigate } from '../lib/router';
 import { useStored } from '../lib/storage';
+import { COMPACT, useMedia } from '../lib/media';
 import { START_FEN, Position } from '../engine/board';
 
 export function DiagramBoard({ diagram, resetKey, onPractice }: { diagram: Diagram; resetKey: unknown; onPractice?: (fen: string) => void }) {
@@ -67,8 +68,13 @@ export function LessonPage({ id }: { id: string }) {
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const boardRef = useRef<HTMLDivElement>(null);
   const lockSpy = useRef(0);
+  const compact = useMedia(COMPACT);
+  const [sheet, setSheet] = useState(false);
 
-  useEffect(() => setActive(0), [id]);
+  useEffect(() => {
+    setActive(0);
+    setSheet(false);
+  }, [id]);
 
   // Theo dõi phần đang đọc để đổi bàn cờ tương ứng
   useEffect(() => {
@@ -101,9 +107,31 @@ export function LessonPage({ id }: { id: string }) {
 
   const show = (i: number) => {
     setActive(i);
+    // màn hình hẹp: bàn cờ mở trong hộp thoại ngay tại đoạn đang đọc, không cuộn lên đầu trang
+    if (compact) return setSheet(true);
     lockSpy.current = Date.now() + 800;
     if (window.innerWidth <= 1100) boardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const board = <DiagramBoard key={`${lesson.id}-${diagIdx}`} diagram={diagram} resetKey={`${lesson.id}-${diagIdx}`} onPractice={(fen) => navigate('/luyen-tap?fen=' + encodeURIComponent(fen))} />;
+  const tocTitle = `Mục lục · ${cat.title} (${sameCat.findIndex((l) => l.id === lesson.id) + 1}/${sameCat.length})`;
+  const toc = (
+    <div className="toc">
+      {lesson.sections.map((s, i) => (
+        <button
+          key={i}
+          className={i === active ? 'active' : ''}
+          onClick={() => {
+            // màn hình hẹp chỉ cuộn tới phần đó; bàn cờ mở bằng nút "Xem trên bàn cờ" của phần
+            if (!compact) show(i);
+            sectionRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        >
+          {i + 1}. {s.heading}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div>
@@ -132,9 +160,15 @@ export function LessonPage({ id }: { id: string }) {
             </div>
             <RichText text={lesson.intro} className="lesson-intro" />
           </div>
+          {compact && (
+            <details className="card tight lesson-toc">
+              <summary>{tocTitle}</summary>
+              {toc}
+            </details>
+          )}
 
           {lesson.sections.map((s, i) => (
-            <section key={i} data-idx={i} ref={(el) => (sectionRefs.current[i] = el)} className={'lesson-section' + (i === active ? ' active' : '')} onClick={() => s.diagram && active !== i && show(i)}>
+            <section key={i} data-idx={i} ref={(el) => (sectionRefs.current[i] = el)} className={'lesson-section' + (i === active ? ' active' : '')} onClick={() => !compact && s.diagram && active !== i && show(i)}>
               <h2>
                 <span className="sec-no">{i + 1}</span>
                 {s.heading}
@@ -160,11 +194,11 @@ export function LessonPage({ id }: { id: string }) {
               )}
               {s.diagram && (
                 <div className="view-diagram">
-                  {i === diagIdx ? (
+                  {i === diagIdx && !compact ? (
                     <span className="tag green">♟ Đang hiển thị trên bàn cờ{s.diagram.moves ? ' – bấm ▶ để xem từng nước' : ''}</span>
                   ) : (
                     <button
-                      className="btn small"
+                      className={'btn' + (compact ? '' : ' small')}
                       onClick={(e) => {
                         e.stopPropagation();
                         show(i);
@@ -206,28 +240,21 @@ export function LessonPage({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="board-col sticky-board" ref={boardRef}>
-          <DiagramBoard key={`${lesson.id}-${diagIdx}`} diagram={diagram} resetKey={`${lesson.id}-${diagIdx}`} onPractice={(fen) => navigate('/luyen-tap?fen=' + encodeURIComponent(fen))} />
-          <div className="card tight" style={{ marginTop: 14 }}>
-            <div className="small muted" style={{ fontWeight: 700, marginBottom: 6 }}>
-              Mục lục · {cat.title} ({sameCat.findIndex((l) => l.id === lesson.id) + 1}/{sameCat.length})
-            </div>
-            <div className="toc">
-              {lesson.sections.map((s, i) => (
-                <button
-                  key={i}
-                  className={i === active ? 'active' : ''}
-                  onClick={() => {
-                    show(i);
-                    sectionRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                >
-                  {i + 1}. {s.heading}
-                </button>
-              ))}
+        {compact ? (
+          <BoardSheet open={sheet} onClose={() => setSheet(false)} no={diagIdx + 1} title={lesson.sections[diagIdx]?.heading ?? lesson.title}>
+            {board}
+          </BoardSheet>
+        ) : (
+          <div className="board-col sticky-board" ref={boardRef}>
+            {board}
+            <div className="card tight" style={{ marginTop: 14 }}>
+              <div className="small muted" style={{ fontWeight: 700, marginBottom: 6 }}>
+                {tocTitle}
+              </div>
+              {toc}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
