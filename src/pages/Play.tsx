@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { CaretLeft, CaretRight, Play as PlayIcon } from '@phosphor-icons/react';
 import { Board, BoardArrow } from '../components/Board';
-import { BotStep, EvalBar, MoveList, MoveMark, RichText, San, StartBar, WinBar } from '../components/common';
+import { BotStep, ClassSymbol, EvalBar, MoveList, MoveMark, RichText, San, StartBar, WinBar } from '../components/common';
 import { BOTS, BotProfile } from '../engine/bots';
 import { Position, START_FEN, GameStatus, Color } from '../engine/board';
 import { requestAnalysis, requestBotMove, cancelBot, cancelAnalysis } from '../engine/client';
@@ -125,7 +126,8 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
             <b>Bạn có một ván đang dở</b> với {BOTS[saved.setup.level - 1].name} (cấp {saved.setup.level}) – {saved.moves.length} nửa nước.
           </div>
           <button className="btn small primary" onClick={() => onStart({ ...saved.setup, id: Date.now(), resumeMoves: saved.moves })}>
-            ▶ Tiếp tục
+            <PlayIcon size={14} weight="fill" aria-hidden="true" />
+            Tiếp tục
           </button>
           <button className="btn small ghost" onClick={() => setSaved(null)}>
             Bỏ ván
@@ -213,7 +215,7 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
           ).map(([k, text]) => (
             <div className="cls-count" key={k}>
               <span className="cls-icon" style={{ background: CLASS_INFO[k].color }}>
-                {CLASS_INFO[k].symbol}
+                <ClassSymbol cls={k} />
               </span>
               <span>
                 <b>{CLASS_INFO[k].label}</b> – <span className="muted">{text}</span>
@@ -612,11 +614,11 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
       predictions.slice(0, 3).forEach((p, i) => arrows.push({ from: p.uci.slice(0, 2), to: p.uci.slice(2, 4), color: 'blue', label: p.prob + '%', opacity: i === 0 ? 0.85 : 0.5 }));
   }
   const showBadge = lastReview && (coach.feedback || over) && (lastReview.color === playerColor || viewing || over);
-  const badge = showBadge && lastReview ? { square: lastReview.uci.slice(2, 4), text: CLASS_INFO[lastReview.cls].symbol, color: CLASS_INFO[lastReview.cls].color } : null;
+  const badge = showBadge && lastReview ? { square: lastReview.uci.slice(2, 4), text: <ClassSymbol cls={lastReview.cls} />, color: CLASS_INFO[lastReview.cls].color } : null;
 
   const marks: (MoveMark | null)[] = reviews.map((r) =>
     r && (coach.feedback || over) && (r.color === playerColor || over) && r.cls !== 'good' && r.cls !== 'excellent'
-      ? { symbol: CLASS_INFO[r.cls].symbol, color: CLASS_INFO[r.cls].color, title: CLASS_INFO[r.cls].label }
+      ? { symbol: <ClassSymbol cls={r.cls} />, color: CLASS_INFO[r.cls].color, title: CLASS_INFO[r.cls].label }
       : null,
   );
 
@@ -679,7 +681,7 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
           {strip(topColor === 0 ? 1 : 0)}
           <div className="controls-bar">
             <button className="btn small" onClick={undo} disabled={moves.length <= base} title="Lùi lại nước vừa đi">
-              ↶ Đi lại
+              ↩️ Đi lại
             </button>
             <button className="btn small" onClick={() => setFlip(!flip)}>
               🔄 Lật bàn
@@ -736,7 +738,7 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
             <div className="banner-review">
               <span>👀 Đang xem lại nước {shownPly}</span>
               <button className="btn small" onClick={() => setViewPly(null)}>
-                Về ván đấu ↩
+                Về ván đấu ↩️
               </button>
             </div>
           )}
@@ -870,18 +872,18 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
               <div className="legend" style={{ marginTop: 8 }}>
                 {(['brilliant', 'great', 'best', 'book', 'inaccuracy', 'mistake', 'blunder'] as const).map((k) => (
                   <span key={k}>
-                    <b style={{ color: CLASS_INFO[k].color }}>{CLASS_INFO[k].symbol}</b> {CLASS_INFO[k].label}
+                    <b style={{ color: CLASS_INFO[k].color }}><ClassSymbol cls={k} /></b> {CLASS_INFO[k].label}
                   </span>
                 ))}
               </div>
             )}
             {viewing && (
               <div className="step-controls" style={{ marginTop: 8 }}>
-                <button className="btn small" disabled={shownPly <= 0} onClick={() => setViewPly(Math.max(0, shownPly - 1))}>
-                  ◀
+                <button className="btn small" disabled={shownPly <= 0} onClick={() => setViewPly(Math.max(0, shownPly - 1))} title="Nước trước" aria-label="Nước trước">
+                  <CaretLeft size={16} weight="fill" aria-hidden="true" />
                 </button>
-                <button className="btn small" onClick={() => setViewPly(shownPly + 1 >= ply ? null : shownPly + 1)}>
-                  ▶
+                <button className="btn small" onClick={() => setViewPly(shownPly + 1 >= ply ? null : shownPly + 1)} title="Nước sau" aria-label="Nước sau">
+                  <CaretRight size={16} weight="fill" aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -957,7 +959,7 @@ function ReviewCard({ review: r, you }: { review: MoveReview; you: boolean }) {
       <h4>🦉 {you ? 'Nhận xét nước đi của bạn' : 'Nhận xét nước đi của máy'}</h4>
       <div className="feedback-head">
         <div className="cls-icon" style={{ background: info.color }}>
-          {info.symbol}
+          <ClassSymbol cls={r.cls} />
         </div>
         <div>
           <div className="fh-title" style={{ color: info.color }}>
@@ -1073,7 +1075,7 @@ function GameOverModal({
           {shown.map((k) => (
             <div className="cls-count" key={k}>
               <span className="cls-icon" style={{ background: CLASS_INFO[k].color }}>
-                {CLASS_INFO[k].symbol}
+                <ClassSymbol cls={k} />
               </span>
               {CLASS_INFO[k].label}
               <b>{summary.counts[k]}</b>
@@ -1091,7 +1093,7 @@ function GameOverModal({
               {summary.keyMistakes.slice(0, 5).map((r) => (
                 <button key={r.ply} className="mistake-item" onClick={() => onReview(r.ply)}>
                   <span className="cls-icon" style={{ background: CLASS_INFO[r.cls].color, width: 26, height: 26, fontSize: '0.72rem' }}>
-                    {CLASS_INFO[r.cls].symbol}
+                    <ClassSymbol cls={r.cls} />
                   </span>
                   <span>
                     Nước {Math.floor(r.ply / 2) + 1}: <San san={r.san} white={r.color === 0} /> – {CLASS_INFO[r.cls].label}
@@ -1116,7 +1118,7 @@ function GameOverModal({
           </button>
           {outcome === 'win' && onHarder && (
             <button className="btn primary" onClick={onHarder}>
-              ⬆ Lên cấp {bot.level + 1}
+              ⬆️ Lên cấp {bot.level + 1}
             </button>
           )}
           <button className="btn" onClick={onNew}>

@@ -299,7 +299,10 @@ export function XqBoard({ fen, orientation = 'red', movable = 'none', onMove, la
           ))}
         </svg>
         {badge && (
-          <div className="sq-badge xq-badge" style={{ left: `calc(${((coords(badge.square)[0] + 1) * 100) / 9}% - 4%)`, top: `calc(${coords(badge.square)[1] * 10}% - 1.2%)`, background: badge.color }}>
+          <div
+            className="sq-badge xq-badge"
+            style={{ left: `min(calc(${((coords(badge.square)[0] + 1) * 100) / 9}% - 4%), calc(100% - max(5.4%, 20px)))`, top: `max(calc(${coords(badge.square)[1] * 10}% - 1.2%), 0px)`, background: badge.color }}
+          >
             {badge.text}
           </div>
         )}

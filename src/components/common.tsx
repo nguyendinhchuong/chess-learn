@@ -1,6 +1,7 @@
 import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
-import { CaretDown } from '@phosphor-icons/react';
+import { BookOpen, CaretDown, Check, Play, Star, ThumbsUp, X, type Icon } from '@phosphor-icons/react';
 import { PIECE_SVG } from '../assets/pieces';
+import { CLASS_INFO, type MoveClass } from '../engine/coach';
 import { COMPACT } from '../lib/media';
 import type { BotStats } from '../lib/storage';
 
@@ -242,8 +243,9 @@ export function StartBar({ bot, details, onStart }: { bot: { level: number; name
         </span>
       </div>
       <button className="btn primary big" onClick={onStart}>
+        <Play size={16} weight="fill" aria-hidden="true" />
         <span>
-          ▶ Bắt đầu
+          Bắt đầu
           <span className="start-bar-long">
             {' '}
             ván đấu với {bot.avatar} {bot.name}
@@ -254,8 +256,28 @@ export function StartBar({ bot, details, onStart }: { bot: { level: number; name
   );
 }
 
+/**
+ * Ký hiệu chất lượng nước đi (huy hiệu trên bàn cờ, biên bản, thẻ nhận xét). Các ký hiệu không phải chữ được vẽ
+ * bằng SVG: emoji và ký hiệu Unicode (★ 👍 ✓ 📖 ✗) mỗi điện thoại vẽ một kiểu, thu nhỏ trong huy hiệu thì vỡ
+ * hoặc mất hẳn; còn !!, !, ?!, ?, ?? vẫn là chữ.
+ */
+const CLASS_GLYPH: Partial<Record<MoveClass, [Icon, 'fill' | 'bold']>> = {
+  best: [Star, 'fill'],
+  excellent: [ThumbsUp, 'fill'],
+  good: [Check, 'bold'],
+  book: [BookOpen, 'fill'],
+  miss: [X, 'bold'],
+};
+
+export function ClassSymbol({ cls }: { cls: MoveClass }) {
+  const glyph = CLASS_GLYPH[cls];
+  if (!glyph) return <>{CLASS_INFO[cls].symbol}</>;
+  const [Glyph, weight] = glyph;
+  return <Glyph className="cls-glyph" size="1.15em" weight={weight} aria-hidden="true" />;
+}
+
 export interface MoveMark {
-  symbol: string;
+  symbol: ReactNode;
   color: string;
   title?: string;
 }

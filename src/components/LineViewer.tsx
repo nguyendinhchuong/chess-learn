@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from '@phosphor-icons/react';
+import { CaretLeft, CaretRight, SkipBack, SkipForward, X } from '@phosphor-icons/react';
 import { playLine, START_FEN, PlayedLine, Position } from '../engine/board';
 import { explainPurpose, isCaptureAt } from '../engine/purpose';
 import type { BoardArrow } from './Board';
@@ -79,17 +79,17 @@ export function StepControls({ ply, count, setPly, extra }: { ply: number; count
   return (
     <div className="step-controls">
       <button className="btn small" onClick={() => setPly(0)} disabled={ply === 0} title="Về đầu">
-        ⏮
+        <SkipBack size={16} weight="fill" aria-hidden="true" />
       </button>
       <button className="btn small" onClick={() => setPly(ply - 1)} disabled={ply === 0} title="Lùi (←)">
-        ◀
+        <CaretLeft size={16} weight="fill" aria-hidden="true" />
       </button>
       <span className="step-counter">{count ? `Nước ${ply}/${count}` : 'Thế cờ'}</span>
       <button className="btn small primary" onClick={() => setPly(ply + 1)} disabled={ply >= count} title="Tiến (→)">
-        ▶
+        <CaretRight size={16} weight="fill" aria-hidden="true" />
       </button>
       <button className="btn small" onClick={() => setPly(count)} disabled={ply >= count} title="Đến cuối">
-        ⏭
+        <SkipForward size={16} weight="fill" aria-hidden="true" />
       </button>
       {extra}
     </div>

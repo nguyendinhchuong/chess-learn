@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Position, moveFrom, moveTo, movePromo, sqName, parseSq } from '../engine/board';
 import { PIECE_SVG } from '../assets/pieces';
 
@@ -12,7 +12,7 @@ export interface BoardArrow {
 
 export interface SquareBadge {
   square: string;
-  text: string;
+  text: ReactNode;
   color: string;
 }
 
@@ -340,7 +340,8 @@ function ArrowShape({ arrow, coords }: { arrow: BoardArrow; coords: (s: string) 
 function Badge({ badge, coords }: { badge: SquareBadge; coords: (s: string) => [number, number] }) {
   const [x, y] = coords(badge.square);
   return (
-    <div className="sq-badge" style={{ left: `calc(${(x + 1) * 12.5}% - 3.2%)`, top: `calc(${y * 12.5}% - 1.6%)`, background: badge.color }}>
+    // nhô ra góc trên bên phải ô, nhưng không lọt ra ngoài mép bàn (bàn cờ cắt phần thừa: cột h, hàng 8)
+    <div className="sq-badge" style={{ left: `min(calc(${(x + 1) * 12.5}% - 3.2%), calc(100% - max(5%, 20px)))`, top: `max(calc(${y * 12.5}% - 1.6%), 0px)`, background: badge.color }}>
       {badge.text}
     </div>
   );
