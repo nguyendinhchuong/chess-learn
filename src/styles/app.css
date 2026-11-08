@@ -2915,3 +2915,180 @@ html.sheet-lock {
     line-height: 20px;
   }
 }
+
+/* ---------- Chơi với bạn (phòng trực tuyến, src/online/) ---------- */
+.text-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  font-family: inherit;
+  /* 16px: Safari trên điện thoại không tự phóng to khi gõ */
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--text);
+  transition: border-color 300ms var(--ease);
+}
+.text-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.text-input.code {
+  max-width: 200px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+}
+.code-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.code-form .text-input {
+  flex: 1 1 160px;
+}
+.online-banner {
+  margin: 0 0 16px;
+  align-items: center;
+}
+.online-invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.online-invite .oi-text {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.online-invite h3 {
+  margin: 0 0 4px;
+}
+.online-invite .code-form {
+  flex: 1 1 280px;
+}
+.room-code {
+  padding: 4px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-size: 28px;
+  line-height: 40px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+.invite-link {
+  display: flex;
+  flex: 1 1 100%;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.invite-link .text-input {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  font-size: 14px;
+  line-height: 20px;
+}
+.online-strip {
+  border-radius: var(--radius-sm);
+  transition: background-color 300ms var(--ease);
+}
+.online-strip.to-move {
+  background: var(--primary-soft);
+}
+.online-strip .pa img,
+.online-strip .pa .xq-fig {
+  width: 30px;
+  height: 30px;
+  margin: 0;
+}
+:root[data-xqpieces='viet'] .online-strip .pa .xq-fig {
+  display: inline-grid;
+}
+.online-strip .ps-main {
+  flex: 1;
+  min-width: 0;
+}
+.online-strip .pn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.online-strip .pn-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.presence {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.presence.on {
+  background: var(--good);
+}
+.clock {
+  flex: none;
+  min-width: 84px;
+  padding: 4px 12px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition:
+    background-color 300ms var(--ease),
+    color 300ms var(--ease);
+}
+/* màu trung tính (không dùng --primary: ở cờ tướng --primary là màu đỏ, dễ nhầm với sắp hết giờ) */
+.clock.running {
+  background: var(--text);
+  color: var(--bg);
+}
+.clock.low {
+  background: var(--danger);
+  color: #fff;
+}
+.online-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.online-result .or-icon {
+  font-size: 32px;
+  line-height: 40px;
+}
+.online-result b {
+  display: block;
+  font-size: 18px;
+  line-height: 24px;
+}
+.online-result .muted {
+  font-size: 14px;
+  line-height: 20px;
+}
+.online-missing h2 {
+  color: var(--text);
+}
+@media (max-width: 640px) {
+  .room-code {
+    font-size: 22px;
+    line-height: 32px;
+  }
+  .clock {
+    min-width: 72px;
+    font-size: 18px;
+  }
+}

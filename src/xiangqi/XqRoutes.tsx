@@ -4,6 +4,8 @@ import { XqOpenings, XqOpeningPage } from './pages/XqOpenings';
 import { XqGames, XqGamePage } from './pages/XqGames';
 import { XqPuzzles, XqPuzzlePage } from './pages/XqPuzzles';
 import { XqPlay } from './pages/XqPlay';
+import { OnlineLobby, OnlineRoom } from '../online/OnlinePages';
+import { XQ_KIT } from './components/xqOnlineKit';
 
 export default function XqRoutes({ section, id, query }: { section: string; id?: string; query: URLSearchParams }) {
   switch (section) {
@@ -17,6 +19,8 @@ export default function XqRoutes({ section, id, query }: { section: string; id?:
       return id ? <XqPuzzlePage key={id} id={id} /> : <XqPuzzles level={query.get('cap') ?? undefined} />;
     case 'luyen-tap':
       return <XqPlay query={query} />;
+    case 'phong':
+      return id ? <OnlineRoom kit={XQ_KIT} code={id} /> : <OnlineLobby kit={XQ_KIT} />;
     default:
       return null;
   }

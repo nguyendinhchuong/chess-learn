@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit -p . && vite build",
+    "dev:server": "wrangler dev --config server/wrangler.jsonc",
+    "build": "tsc --noEmit -p . && tsc --noEmit -p server && vite build",
+    "typecheck:server": "tsc --noEmit -p server",
+    "deploy:server": "wrangler deploy --config server/wrangler.jsonc",
     "preview": "vite preview",
     "test": "vitest run tests",
     "bench:bots": "vitest run scripts/selfplay.test.ts --dir scripts",
@@ -19,6 +22,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261108.1",
     "@playwright/test": "^1.48.2",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
@@ -26,6 +30,7 @@
     "@vitejs/plugin-react": "^4.3.3",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "wrangler": "^4.158.0"
   }
 }
