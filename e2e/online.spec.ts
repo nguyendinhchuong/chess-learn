@@ -64,15 +64,33 @@ test('cờ vua: tạo phòng, bạn vào bằng đường dẫn, chơi tới chi
   await expect(page.locator('.online-status')).toContainText('Chiếu hết');
   await expect(friend.page.locator('.online-status')).toContainText('Bạn thua');
 
-  // tải lại trang: vẫn là người cầm quân Đen, ván cờ còn nguyên
+  // hộp thoại kết quả hiện cho cả hai bên: tỉ số, tên, lý do; Esc đóng, nút "Kết quả" mở lại
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Bạn thắng!');
+  await expect(dialog).toContainText('Chiếu hết');
+  await expect(dialog.locator('.rd-score')).toHaveText('1–0');
+  await expect(dialog.locator('.rd-player.won')).toContainText('An');
+  await expectNoHorizontalOverflow(page);
+  const friendDialog = friend.page.getByRole('dialog');
+  await expect(friendDialog).toContainText('Bạn thua');
+  await friend.page.keyboard.press('Escape');
+  await expect(friendDialog).toHaveCount(0);
+  await friend.page.getByRole('button', { name: /Kết quả/ }).click();
+  await expect(friendDialog).toContainText('Bạn thua');
+
+  // tải lại trang: vẫn là người cầm quân Đen, ván cờ còn nguyên; hộp thoại không tự mở lại
   await friend.page.reload();
+  await expect(friend.page.locator('.online-status')).toContainText('Bạn thua');
+  await expect(friendDialog).toHaveCount(0);
   await expect(friend.page.locator('.online-strip', { hasText: 'Bình' })).toContainText('Cầm quân Đen');
   await expect(friend.page.locator('.online-strip', { hasText: 'Bình' })).toContainText('Bạn');
   await expect(moveCount(friend.page)).toHaveCount(line.length);
 
-  // ván mới: hai bên đổi màu
-  await page.getByRole('button', { name: /Ván mới/ }).click();
+  // ván mới (bấm trong hộp thoại kết quả): hai bên đổi màu, hộp thoại tự đóng khi ván mới bắt đầu
+  await dialog.getByRole('button', { name: /Ván mới/ }).click();
+  await expect(dialog).toContainText('Đang chờ Bình đồng ý');
   await friend.page.getByRole('button', { name: /Đồng ý chơi ván mới/ }).click();
+  await expect(dialog).toHaveCount(0);
   await expect(friend.page.locator('.online-status')).toContainText('Đến lượt bạn');
   await expect(friend.page.locator('.online-strip', { hasText: 'Bình' })).toContainText('Cầm quân Trắng');
   await expect(moveCount(page)).toHaveCount(0);

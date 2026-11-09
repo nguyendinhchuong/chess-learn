@@ -3082,6 +3082,154 @@ html.sheet-lock {
 .online-missing h2 {
   color: var(--text);
 }
+/* hộp thoại kết quả ván đấu (gắn vào body, nằm ngoài .app) */
+.result-dialog {
+  position: relative;
+  max-width: 460px;
+  text-align: center;
+}
+.result-dialog:focus {
+  outline: none;
+}
+.rd-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.rd-badge {
+  width: 80px;
+  height: 80px;
+  margin: 8px auto 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 48px;
+  line-height: 1;
+  background: var(--surface-2);
+}
+.rd-badge.win {
+  background: var(--accent-soft);
+}
+.rd-badge.draw {
+  background: var(--info-soft);
+}
+.result-dialog h2 {
+  margin: 16px 0 4px;
+  font-size: 30px;
+  line-height: 36px;
+}
+.rd-detail {
+  margin: 0;
+  color: var(--text-2);
+}
+.rd-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.rd-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.rd-avatar {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--bg-2);
+  transition: opacity 300ms var(--ease);
+}
+.rd-avatar img,
+.rd-avatar .xq-fig {
+  width: 36px;
+  height: 36px;
+  margin: 0;
+}
+:root[data-xqpieces='viet'] .rd-avatar .xq-fig {
+  display: inline-grid;
+}
+.rd-player.won .rd-avatar {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.rd-player.lost .rd-avatar {
+  opacity: 0.5;
+}
+.rd-crown {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  font-size: 18px;
+  line-height: 28px;
+}
+.rd-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.rd-meta {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.rd-clock {
+  margin-top: -4px;
+  font-variant-numeric: tabular-nums;
+}
+.rd-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rd-dash {
+  color: var(--text-3);
+}
+.rd-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 16px 0 0;
+}
+.rd-stats dt {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 16px;
+}
+.rd-stats dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+.result-dialog .callout {
+  text-align: left;
+  align-items: center;
+}
+.rd-actions {
+  justify-content: center;
+  margin-top: 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    animation-name: fade;
+  }
+}
 @media (max-width: 640px) {
   .room-code {
     font-size: 22px;
