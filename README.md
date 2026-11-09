@@ -80,6 +80,10 @@ VITE_ROOM_SERVER=https://ky-dao-rooms.<tên>.workers.dev npm run build
 
 Nếu trang web và máy chủ phòng cùng một tên miền (ví dụ đặt Worker ở đường dẫn `/api/*` của tên miền trang web) thì không cần `VITE_ROOM_SERVER`. Máy chủ cho phép mọi nguồn gọi API (không dùng cookie); muốn giới hạn, sửa `CORS` trong `server/src/index.ts`. Chưa có giới hạn số phòng tạo ra mỗi phút – nếu bị lạm dụng, bật Rate Limiting của Cloudflare cho `POST /api/rooms`.
 
+## Thống kê truy cập (Google Analytics qua Google Tag Manager)
+
+`src/lib/analytics.ts` tải vùng chứa GTM có mã trong `.env.production` (`VITE_GTM_ID`), chỉ ở bản build production nên `npm run dev` và e2e không gửi dữ liệu. Vì các trang nằm sau dấu `#`, mỗi lần đổi trang ứng dụng đẩy sự kiện `virtual_page_view` vào `dataLayer` kèm `page_location` dạng `https://…/co-vua/hoc` và `page_title`. Trong GTM: thẻ GA4 Event tên `page_view` lấy hai tham số này từ biến Data Layer và chạy theo sự kiện tùy chỉnh `virtual_page_view`; Google tag đặt `send_page_view` = `false` để lượt tải đầu không bị đếm hai lần. Thử bản build: `npm run build && npm run preview` rồi bật chế độ Preview của GTM.
+
 ## Kiến trúc
 
 | Thư mục | Nội dung |
