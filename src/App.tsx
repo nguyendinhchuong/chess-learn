@@ -1,5 +1,5 @@
 import { lazy, ReactNode, Suspense, useEffect } from 'react';
-import { BookOpenText, House, Moon, Palette, PuzzlePiece, Robot, Scroll, SpeakerHigh, SpeakerSlash, Strategy, Sun, Trophy } from '@phosphor-icons/react';
+import { BookOpenText, House, Moon, Palette, PuzzlePiece, Robot, Scroll, SpeakerHigh, SpeakerSlash, Strategy, Sun, Trophy, UsersThree } from '@phosphor-icons/react';
 import { useRoute, href } from './lib/router';
 import { useRevealOnScroll } from './lib/reveal';
 import { useStored, save, DEFAULT_SETTINGS, Settings } from './lib/storage';
@@ -10,6 +10,8 @@ import { Openings, OpeningPage } from './pages/Openings';
 import { Games, GamePage } from './pages/Games';
 import { Play } from './pages/Play';
 import { Puzzles, PuzzlePage } from './pages/Puzzles';
+import { OnlineLobby, OnlineRoom } from './online/OnlinePages';
+import { CHESS_KIT } from './online/chessKit';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LandingNotFound, LandingSkeleton, WelcomeSkeleton } from './landing/Skeleton';
 
@@ -31,6 +33,7 @@ const NAV: Record<Game, [string, string, ReactNode][]> = {
     ['van-co', 'Ván kinh điển', <Trophy {...ic} />],
     ['co-the', 'Cờ thế', <PuzzlePiece {...ic} />],
     ['luyen-tap', 'Luyện tập', <Robot {...ic} />],
+    ['phong', 'Chơi với bạn', <UsersThree {...ic} />],
   ],
   xq: [
     ['', 'Trang chủ', <House {...ic} />],
@@ -39,12 +42,13 @@ const NAV: Record<Game, [string, string, ReactNode][]> = {
     ['van-co', 'Ván kinh điển', <Trophy {...ic} />],
     ['co-the', 'Cờ thế', <PuzzlePiece {...ic} />],
     ['luyen-tap', 'Luyện tập', <Robot {...ic} />],
+    ['phong', 'Chơi với bạn', <UsersThree {...ic} />],
   ],
 };
 
 const BASE: Record<Game, string> = { chess: '', xq: XQ };
 /** Các mục trong khung ứng dụng; địa chỉ khác (trừ trang chọn môn và trang giới thiệu) là trang không tìm thấy */
-const SECTIONS = ['hoc', 'khai-cuoc', 'van-co', 'co-the', 'luyen-tap'];
+const SECTIONS = ['hoc', 'khai-cuoc', 'van-co', 'co-the', 'luyen-tap', 'phong'];
 /** Trang giới thiệu của từng môn là trang chủ: mục "Trang chủ" và logo trên thanh điều hướng dẫn về đây */
 const LANDING: Record<Game, string> = { chess: '/gioi-thieu/co-vua', xq: '/gioi-thieu/co-tuong' };
 
@@ -60,6 +64,8 @@ function chessPage(section: string, id: string | undefined, query: URLSearchPara
       return id ? <PuzzlePage key={id} id={id} /> : <Puzzles level={query.get('cap') ?? undefined} />;
     case 'luyen-tap':
       return <Play query={query} />;
+    case 'phong':
+      return id ? <OnlineRoom kit={CHESS_KIT} code={id} /> : <OnlineLobby kit={CHESS_KIT} />;
     default:
       return null;
   }

@@ -1,0 +1,15 @@
+// Máy chủ phòng chơi trực tuyến. Chạy thử: `npm run dev:server`; triển khai: `npm run deploy:server`.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "ky-dao-rooms",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-11-01",
+  "durable_objects": {
+    "bindings": [{ "name": "ROOMS", "class_name": "GameRoom" }]
+  },
+  // Durable Object lưu bằng SQLite: dùng được cả ở gói miễn phí
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameRoom"] }],
+  "observability": { "enabled": true },
+  // trang web khi phát triển (vite.config.ts) chuyển /api tới cổng này
+  "dev": { "port": 8790 }
+}
