@@ -29,6 +29,9 @@ for (const [path, name] of [
     await scrollToBottom(page);
     // bàn cờ ván mẫu đi theo nhịp cuộn: cuộn qua hết thì ở nửa nước cuối cùng
     await expect(page.locator('.ld-game-move .ld-muted').first()).toHaveText(/^(\d+)\/\1$/);
+    // phòng minh họa của phần Chơi với bạn đi hết các khung, tới lời đề nghị hòa
+    await expect(page.locator('.ld-room-offer.on')).toHaveCount(1);
+    await expect(page.locator('#hoi-dap')).toHaveCount(0);
     // câu tuyên ngôn sáng hết từng chữ
     const words = await page.locator('.ld-word').count();
     await expect(page.locator('.ld-word.on')).toHaveCount(words);
@@ -37,6 +40,30 @@ for (const [path, name] of [
     expect(errors, errors.join('\n')).toEqual([]);
   });
 }
+
+test('dòng "Mới" ở phần mở đầu cuộn tới phần Chơi với bạn, nút tạo phòng dẫn tới trang tạo phòng', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/#/gioi-thieu/co-vua');
+  await page.locator('.ld-announce').click();
+  const section = page.locator('#choi-voi-ban');
+  await expect(section.locator('h2')).toBeInViewport();
+  // phòng còn chờ người thứ hai: lời mời hiện mã phòng
+  await expect(page.locator('.ld-room-invite.on')).toContainText('QH8VNT');
+  await expect(section.getByRole('link', { name: 'Tạo phòng chơi cờ vua' })).toHaveAttribute('href', '#/phong');
+  await expectNoHorizontalOverflow(page);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('chân trang: nút Quyền riêng tư mở phần giải thích dữ liệu được lưu', async ({ page }) => {
+  await page.goto('/#/gioi-thieu/co-tuong');
+  const btn = page.getByRole('button', { name: 'Quyền riêng tư' });
+  const panel = page.locator('#quyen-rieng-tu');
+  await expect(panel).toBeHidden();
+  await btn.click();
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('Phòng bị xóa sau 3 ngày');
+  await expect(btn).toHaveAttribute('aria-expanded', 'true');
+});
 
 test('trang giới thiệu không tồn tại hiện trang 404 có đường về', async ({ page }) => {
   await page.goto('/#/gioi-thieu/khong-co');
