@@ -8,6 +8,12 @@
       "port": 5174
     },
     {
+      "name": "ky-dao-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--port", "5175", "--strictPort"],
+      "port": 5175
+    },
+    {
       "name": "rooms",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:server", "--", "--port", "8790"],

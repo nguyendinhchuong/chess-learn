@@ -1,6 +1,7 @@
 import { lazy, ReactNode, Suspense, useEffect } from 'react';
 import { BookOpenText, House, Moon, Palette, PuzzlePiece, Robot, Scroll, SpeakerHigh, SpeakerSlash, Strategy, Sun, Trophy, UsersThree } from '@phosphor-icons/react';
 import { useRoute, href } from './lib/router';
+import { trackPageView } from './lib/analytics';
 import { useRevealOnScroll } from './lib/reveal';
 import { useStored, save, DEFAULT_SETTINGS, Settings } from './lib/storage';
 import { PIECE_SVG } from './assets/pieces';
@@ -111,6 +112,12 @@ export function App() {
     save('last-game', game);
     document.title = game === 'xq' ? 'Kỳ Đạo – Học cờ tướng' : 'Kỳ Đạo – Học cờ vua';
   }, [game, intro]);
+
+  // lượt xem trang cho Google Analytics, sau khi đã đặt document.title ở trên
+  const routeKey = route.path.join('/');
+  useEffect(() => {
+    trackPageView();
+  }, [routeKey]);
 
   if (intro !== null) {
     const landing =
