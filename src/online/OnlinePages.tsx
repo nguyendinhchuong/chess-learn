@@ -1,7 +1,8 @@
 // Chơi với bạn: trang tạo phòng (#/phong, #/co-tuong/phong) và trang phòng (#/phong/MÃ).
 // Dùng chung cho hai môn cờ; phần riêng của từng môn nằm trong OnlineKit.
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Copy, ShareNetwork, SignIn, UsersThree } from '@phosphor-icons/react';
+import { createPortal } from 'react-dom';
+import { Copy, ShareNetwork, SignIn, UsersThree, X } from '@phosphor-icons/react';
 import { href, navigate } from '../lib/router';
 import { useStored } from '../lib/storage';
 import { sounds } from '../lib/sound';
@@ -211,6 +212,10 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
   const [viewPly, setViewPly] = useState<number | null>(null);
   const [flip, setFlip] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  // hộp thoại kết quả: tự mở khi ván vừa kết thúc (không mở khi vào phòng có ván đã xong từ trước)
+  const [resultOpen, setResultOpen] = useState(false);
+  const resultTimer = useRef<number>();
+  useEffect(() => () => clearTimeout(resultTimer.current), []);
   const sameVariant = room?.variant === kit.variant;
 
   // mã phòng của môn cờ kia: chuyển sang đúng trang
@@ -265,9 +270,15 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
     if (prev === 'waiting' && st === 'playing') {
       sounds.check();
       setToast('Đủ hai người – ván cờ bắt đầu!');
-    } else if (prev === 'playing' && st === 'over' && room.reason !== 'checkmate' && room.reason !== 'stalemate') {
-      sounds.end();
+    } else if (prev === 'playing' && st === 'over') {
+      // chiếu hết / hết nước đi xảy ra trên bàn cờ: âm thanh đã phát cùng nước đi, chờ một nhịp để người chơi thấy nước cuối
+      const onBoard = room.reason === 'checkmate' || room.reason === 'stalemate';
+      if (!onBoard) sounds.end();
+      clearTimeout(resultTimer.current);
+      resultTimer.current = window.setTimeout(() => setResultOpen(true), onBoard ? 900 : 300);
     } else if (prev === 'over' && st === 'playing') {
+      clearTimeout(resultTimer.current);
+      setResultOpen(false);
       setViewPly(null);
       setToast('Ván mới bắt đầu – hai bên đã đổi màu.');
     }
@@ -277,13 +288,13 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
   // ← → xem lại các nước
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (resultOpen || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === 'ArrowLeft') setViewPly((v) => Math.max(0, (v ?? ply) - 1));
       else if (e.key === 'ArrowRight') setViewPly((v) => (v === null || v + 1 >= ply ? null : v + 1));
     };
     window.addEventListener('keydown', on);
     return () => window.removeEventListener('keydown', on);
-  }, [ply]);
+  }, [ply, resultOpen]);
 
   if (conn === 'not-found') return <RoomMissing kit={kit} code={code} />;
   if (conn === 'full')
@@ -390,9 +401,14 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
                 </button>
               </>
             )}
+            {room.status === 'over' && (
+              <button className="btn small" onClick={() => setResultOpen(true)}>
+                🏁 Kết quả
+              </button>
+            )}
             {you !== null && room.status === 'over' && (
               <button className="btn small primary" onClick={() => send({ t: 'rematch' })} disabled={room.rematch[you]}>
-                ♻️ {room.rematch[you] ? 'Đang chờ đối thủ…' : opp !== null && room.rematch[opp] ? 'Đồng ý chơi ván mới' : 'Ván mới (đổi màu)'}
+                ♻️ {rematchLabel(room, you)}
               </button>
             )}
           </div>
@@ -466,6 +482,10 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
           </div>
         </div>
       </div>
+
+      {resultOpen && room.status === 'over' && (
+        <ResultDialog kit={kit} room={room} you={you} onClose={() => setResultOpen(false)} onRematch={() => send({ t: 'rematch' })} />
+      )}
     </div>
   );
 }
@@ -477,19 +497,173 @@ function statusText(room: PublicRoom, you: Side | null, turn: Side, kit: OnlineK
   return `Chờ ${room.seats[turn]?.name ?? 'đối thủ'} đi…`;
 }
 
-function resultInfo(room: PublicRoom, you: Side | null, kit: OnlineKit): { icon: string; title: string; detail: string } {
-  const winner: Side | null = room.result === '1-0' ? 0 : room.result === '0-1' ? 1 : null;
+const winnerOf = (room: PublicRoom): Side | null => (room.result === '1-0' ? 0 : room.result === '0-1' ? 1 : null);
+
+type Outcome = 'win' | 'loss' | 'draw' | 'watch';
+
+function resultInfo(room: PublicRoom, you: Side | null, kit: OnlineKit): { outcome: Outcome; icon: string; title: string; detail: string } {
+  const winner = winnerOf(room);
   const reason = room.reason ? kit.reasons[room.reason] : '';
-  if (winner === null) return { icon: '🤝', title: 'Hòa', detail: cap(reason) };
+  if (winner === null) return { outcome: 'draw', icon: '🤝', title: 'Hòa', detail: cap(reason) };
   const loser = (winner ^ 1) as Side;
   // xin thua, hết giờ, chiếu dai: nói rõ bên nào
   const detail = room.reason === 'resign' || room.reason === 'timeout' || room.reason === 'perpetual' ? `${kit.sideNames[loser]} ${reason}` : cap(reason);
-  if (you === winner) return { icon: '🏆', title: 'Bạn thắng!', detail };
-  if (you === loser) return { icon: '😔', title: 'Bạn thua', detail };
-  return { icon: '🏁', title: `${kit.sideNames[winner]} thắng (${room.seats[winner]?.name ?? ''})`, detail };
+  if (you === winner) return { outcome: 'win', icon: '🏆', title: 'Bạn thắng!', detail };
+  if (you === loser) return { outcome: 'loss', icon: '😔', title: 'Bạn thua', detail };
+  return { outcome: 'watch', icon: '🏁', title: `${kit.sideNames[winner]} thắng (${room.seats[winner]?.name ?? ''})`, detail };
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function rematchLabel(room: PublicRoom, you: Side): string {
+  if (room.rematch[you]) return 'Đang chờ đối thủ…';
+  return room.rematch[(you ^ 1) as Side] ? 'Đồng ý chơi ván mới' : 'Ván mới (đổi màu)';
+}
+
+/** Lời nhắn về ván mới cho người chơi: đối thủ đã mời chưa, còn trong phòng không */
+function rematchNote(room: PublicRoom, you: Side | null): string | null {
+  if (you === null) return null;
+  const opp = (you ^ 1) as Side;
+  const seat = room.seats[opp];
+  const name = seat?.name ?? 'Đối thủ';
+  const away = seat !== null && !seat.online;
+  if (room.rematch[you]) return `Đang chờ ${name} đồng ý chơi ván mới.` + (away ? ` ${name} hiện không ở trong phòng.` : '');
+  if (room.rematch[opp]) return `${name} muốn chơi ván mới, hai bên sẽ đổi màu.`;
+  if (away) return `${name} đã rời phòng.`;
+  return null;
+}
+
+/**
+ * Hộp thoại kết quả ván đấu: hiện khi ván vừa kết thúc; đóng bằng ✕, chạm vùng tối hoặc Esc rồi mở lại bằng nút "Kết quả".
+ * Gắn thẳng vào body (như BoardSheet) để hiệu ứng hiện trang của khung ứng dụng không làm lệch vị trí cố định.
+ */
+function ResultDialog({ kit, room, you, onClose, onRematch }: { kit: OnlineKit; room: PublicRoom; you: Side | null; onClose: () => void; onRematch: () => void }) {
+  const root = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const close = useRef(onClose);
+  close.current = onClose;
+
+  useEffect(() => {
+    // đóng hộp thoại thì trả tiêu điểm về chỗ cũ (vd nút "Kết quả")
+    const back = document.activeElement as HTMLElement | null;
+    // trang phía sau đứng yên, không nhận chạm hay tiêu điểm (Tab không lọt ra sau hộp thoại)
+    document.documentElement.classList.add('sheet-lock');
+    const inerted: HTMLElement[] = [];
+    for (const s of Array.from(document.body.children)) {
+      if (s !== root.current && s instanceof HTMLElement && !s.inert) {
+        s.inert = true;
+        inerted.push(s);
+      }
+    }
+    panel.current?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.documentElement.classList.remove('sheet-lock');
+      inerted.forEach((s) => (s.inert = false));
+      document.removeEventListener('keydown', onKey);
+      back?.focus({ preventScroll: true });
+    };
+  }, []);
+
+  const info = resultInfo(room, you, kit);
+  const winner = winnerOf(room);
+  const note = rematchNote(room, you);
+  const fullMoves = Math.ceil(room.moves.length / 2);
+  const score = (s: Side) => (winner === null ? '½' : winner === s ? '1' : '0');
+
+  const player = (s: Side) => {
+    const seat = room.seats[s];
+    return (
+      <div className={'rd-player' + (winner === s ? ' won' : winner !== null ? ' lost' : '')}>
+        <span className="rd-avatar">
+          <kit.SideIcon side={s} />
+          {winner === s && (
+            <span className="rd-crown" aria-hidden="true">
+              👑
+            </span>
+          )}
+        </span>
+        <span className="rd-name">{seat?.name ?? kit.sideNames[s]}</span>
+        <span className="rd-meta">
+          {you === s && 'Bạn · '}
+          {kit.sideNames[s]}
+        </span>
+        {room.clocks && (
+          <span className="rd-meta rd-clock" title="Thời gian còn lại">
+            ⏱️ {formatClock(room.clocks[s])}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  return createPortal(
+    <div ref={root} className="modal-back" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={panel} className="modal result-dialog" role="dialog" aria-modal="true" aria-labelledby="rd-title" aria-describedby="rd-detail" tabIndex={-1}>
+        <button type="button" className="icon-btn rd-close" aria-label="Đóng" onClick={onClose}>
+          <X size={16} weight="bold" aria-hidden="true" />
+        </button>
+        <div className={'rd-badge ' + info.outcome} aria-hidden="true">
+          {info.icon}
+        </div>
+        <h2 id="rd-title">{info.title}</h2>
+        <p id="rd-detail" className="rd-detail">
+          {info.detail}
+        </p>
+
+        <div className="rd-board" aria-label={`Tỉ số: ${room.seats[0]?.name ?? kit.sideNames[0]} ${score(0)}, ${room.seats[1]?.name ?? kit.sideNames[1]} ${score(1)}`}>
+          {player(0)}
+          <div className="rd-score" aria-hidden="true">
+            <span>{score(0)}</span>
+            <span className="rd-dash">–</span>
+            <span>{score(1)}</span>
+          </div>
+          {player(1)}
+        </div>
+
+        <dl className="rd-stats">
+          <div>
+            <dt>Số nước</dt>
+            <dd>{fullMoves}</dd>
+          </div>
+          <div>
+            <dt>Thời gian</dt>
+            <dd>{room.time ? `${Math.round(room.time.initial / 60_000)} + ${Math.round(room.time.increment / 1000)}` : 'Không giới hạn'}</dd>
+          </div>
+          <div>
+            <dt>Ván thứ</dt>
+            <dd>{room.game}</dd>
+          </div>
+        </dl>
+
+        {note && (
+          <div className="callout info" role="status">
+            <span className="ci" aria-hidden="true">
+              ♻️
+            </span>
+            <span>{note}</span>
+          </div>
+        )}
+
+        <div className="btn-row rd-actions">
+          {you !== null && (
+            <button className="btn primary" onClick={onRematch} disabled={room.rematch[you]}>
+              ♻️ {rematchLabel(room, you)}
+            </button>
+          )}
+          <button className="btn" onClick={onClose}>
+            🔍 Xem lại ván
+          </button>
+          <a className="btn ghost" href={href(`${kit.base}/phong`)}>
+            ➕ Tạo phòng khác
+          </a>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
 
 function InviteCard({ kit, room }: { kit: OnlineKit; room: PublicRoom }) {
   const link = roomLink(kit.base, room.code);
