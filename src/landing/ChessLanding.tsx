@@ -1,5 +1,5 @@
 // Trang giới thiệu cờ vua (#/gioi-thieu/co-vua): toàn bộ nội dung riêng của môn cờ vua, khung trang nằm ở Landing.tsx.
-import { ArrowsLeftRight, BookOpenText, ChartLineUp, ChatCircleText, Lightbulb, PuzzlePiece, Robot, SealCheck, Strategy, Trophy } from '@phosphor-icons/react';
+import { ArrowsLeftRight, BookOpenText, ChartLineUp, ChatCircleText, Handshake, Lightbulb, LinkSimple, PuzzlePiece, Robot, Scales, SealCheck, Strategy, Trophy, WifiSlash } from '@phosphor-icons/react';
 import { ALL_LESSONS } from '../data/lessons';
 import { OPENINGS } from '../data/openings';
 import { GAMES } from '../data/games/index';
@@ -7,6 +7,7 @@ import { PUZZLES } from '../data/puzzles';
 import { BOTS } from '../engine/bots';
 import { CLASS_INFO } from '../engine/coach';
 import { START_FEN, playLine } from '../engine/board';
+import { TIME_PRESETS, timeLabel } from '../online/protocol';
 import { Landing, LandingConfig } from './Landing';
 import { LadderStage, LessonStage, GameStage, MapStage, StageProps } from './Stages';
 import { buildLine, fromFen } from './pieces';
@@ -21,6 +22,12 @@ const opera = GAMES.find((g) => g.id === OPERA_ID)!;
 const operaPlayed = playLine(opera.moves);
 const operaLine = buildLine(START_FEN, operaPlayed.ucis, 'chess');
 const years = GAMES.map((g) => g.year);
+
+// phòng minh họa của phần Chơi với bạn: tám nửa nước đầu của khai cuộc Ý, giờ 10 + 5 như mặc định khi tạo phòng
+const ROOM_PLIES = 8;
+const italian = playLine(OPENINGS.find((o) => o.id === 'italian')!.moves);
+const roomTime = TIME_PRESETS.find((p) => p.label === '10 + 5')!.time!;
+const timed = TIME_PRESETS.filter((p) => p.time);
 
 const ic = { size: 22, weight: 'regular' as const };
 
@@ -125,9 +132,10 @@ const CONFIG: LandingConfig = {
     { label: 'Ván kinh điển', to: '/van-co' },
     { label: 'Cờ thế', to: '/co-the' },
     { label: 'Luyện tập với máy', to: '/luyen-tap' },
+    { label: 'Chơi với bạn', to: '/phong' },
   ],
   hero: {
-    eyebrow: 'Học cờ vua bằng tiếng Việt',
+    announce: 'Chơi cờ vua với bạn bè qua một đường dẫn',
     title: ['Học cờ vua từ con\u00a0số\u00a00', 'đến tư\u00a0duy kiện\u00a0tướng'],
     sub: `${ALL_LESSONS.length} bài học có bàn cờ minh họa, ${GAMES.length} ván kinh điển được giảng từng nước và một huấn luyện viên chấm điểm khi bạn đấu với máy. Miễn phí, không cần tài khoản.`,
     proof: `Phân tích bằng Stockfish 18 · ${PUZZLES.length} bài cờ thế được máy kiểm chứng lời giải`,
@@ -188,6 +196,32 @@ const CONFIG: LandingConfig = {
       },
     ],
   },
+  online: {
+    kicker: 'Chơi với bạn',
+    title: ['Mời bạn một ván cờ vua', 'chỉ bằng một đường dẫn'],
+    sub: 'Tạo phòng, chọn màu quân và thời gian, rồi gửi đường dẫn hoặc mã phòng sáu ký tự. Bạn của bạn bấm vào là ngồi vào bàn, không cần tài khoản hay cài ứng dụng.',
+    items: [
+      { icon: <LinkSimple size={24} />, title: 'Một đường dẫn là đủ', text: 'Chép hoặc chia sẻ lời mời. Ván cờ bắt đầu ngay khi người thứ hai vào phòng, người đến sau được xem trực tiếp.' },
+      { icon: <Scales size={24} />, title: 'Máy chủ làm trọng tài', text: `Mọi nước đi được kiểm tra đúng luật cờ vua, đồng hồ chạy trên máy chủ. Có ${timed.length} mức thời gian từ ${timed[0].label} tới ${timed[timed.length - 1].label}, hoặc không giới hạn.` },
+      { icon: <WifiSlash size={24} />, title: 'Rớt mạng vẫn giữ ván', text: 'Tải lại trang hay mất sóng giữa chừng, bạn quay về đúng thế cờ và đúng thời gian còn lại.' },
+      { icon: <Handshake size={24} />, title: 'Cầu hòa, xin thua, ván mới', text: 'Hết ván, bấm Ván mới để chơi tiếp trong cùng phòng. Hai bên tự đổi màu quân.' },
+    ],
+    cta: { label: 'Tạo phòng chơi cờ vua', to: '/phong' },
+    note: 'Không cần tài khoản. Phòng tự xóa sau 3 ngày không ai chơi.',
+    room: {
+      line: buildLine(START_FEN, italian.ucis.slice(0, ROOM_PLIES), 'chess'),
+      sans: italian.sans.slice(0, ROOM_PLIES),
+      code: 'QH8VNT',
+      time: timeLabel(roomTime),
+      clock: roomTime.initial / 1000,
+      inc: roomTime.increment / 1000,
+      think: [3, 4, 12, 9, 26, 17, 41, 22],
+      sides: ['Trắng', 'Đen'],
+      kings: ['wk', 'bk'],
+      you: 'Quang Huy',
+      friend: 'Minh Thư',
+    },
+  },
   tagline: ['Mỗi nước cờ đều có lý do.', 'Kỳ Đạo giảng lý do ấy', 'bằng tiếng Việt, từng nước,', 'cho tới ngày bạn tự nhìn ra.'],
   benefits: {
     kicker: 'Lợi ích',
@@ -208,19 +242,6 @@ const CONFIG: LandingConfig = {
       { title: 'Thắng Gà Con, rồi leo tiếp', text: 'Đấu với máy cấp 1 và xem huấn luyện viên chấm từng nước. Thắng một cấp thì thử cấp kế tiếp.', link: { label: 'Vào sàn đấu', to: '/luyen-tap' } },
     ],
   },
-  faq: {
-    kicker: 'Hỏi đáp',
-    title: ['Những điều người mới', 'hay hỏi trước khi bắt đầu'],
-    items: [
-      { q: 'Kỳ Đạo có mất phí không?', a: 'Không. Mọi bài học, ván cờ, bài cờ thế và máy đấu đều miễn phí. Không có quảng cáo, không có gói trả phí và không cần tạo tài khoản.' },
-      { q: 'Tôi chưa biết đi quân, học có kịp không?', a: `Kịp. Phần Nhập môn bắt đầu từ bàn cờ trống: tọa độ, cách đi của từng quân, nhập thành, bắt tốt qua đường và chiếu hết. Bài đầu tiên mất khoảng ${first.minutes} phút.` },
-      { id: 'quyen-rieng-tu', q: 'Tiến độ học được lưu ở đâu?', a: 'Ngay trên trình duyệt của bạn. Kỳ Đạo không gửi tiến độ, ván đấu hay dữ liệu cá nhân nào lên máy chủ. Nếu bạn xóa dữ liệu trình duyệt hoặc đổi máy, tiến độ sẽ bắt đầu lại từ đầu.' },
-      { q: 'Máy đấu mạnh tới đâu?', a: `${BOTS.length} cấp với Elo ước tính từ ${BOTS[0].elo} đến ${BOTS[BOTS.length - 1].elo}. Cấp cao nhất là bộ máy viết bằng JavaScript, nghĩ khoảng 4 giây mỗi nước. Phần gợi ý và phân tích dùng Stockfish 18, mạnh hơn đại kiện tướng rất nhiều.` },
-      { q: 'Lời bình các ván kinh điển lấy từ đâu?', a: 'Các nước then chốt dùng lời bình gốc. Mỗi ván có đường dẫn nguồn để bạn đối chiếu biên bản, như chessgames.com, Wikipedia hay lichess.' },
-      { q: 'Dùng trên điện thoại được không?', a: 'Được. Bàn cờ co giãn theo màn hình, bạn chạm hoặc kéo thả để đi quân. Lời giảng và nút ◀ ▶ luôn nằm trong tầm mắt khi bạn xem từng nước.' },
-      { q: 'Tôi có học được cờ tướng ở đây không?', a: 'Có. Kỳ Đạo có đủ bài học, khai cuộc, ván kinh điển, cờ thế và máy đấu cho cờ tướng. Nút chọn môn trên thanh tiêu đề chuyển giữa hai môn, tiến độ mỗi môn được lưu riêng.' },
-    ],
-  },
   final: {
     title: ['Bàn cờ đã bày xong.', 'Đến lượt bạn đi.'],
     sub: `Bài đầu tiên dài ${first.minutes} phút. Học xong, bạn đọc được mọi sơ đồ và ván cờ trên Kỳ Đạo.`,
@@ -229,7 +250,7 @@ const CONFIG: LandingConfig = {
     boardLabel: 'Các quân cờ vua bay về thế ban đầu',
   },
   footer: {
-    blurb: 'Ứng dụng học cờ vua và cờ tướng bằng tiếng Việt: bài học, khai cuộc, ván kinh điển, cờ thế và máy đấu có huấn luyện viên.',
+    blurb: 'Ứng dụng học cờ vua và cờ tướng bằng tiếng Việt: bài học, khai cuộc, ván kinh điển, cờ thế, máy đấu có huấn luyện viên và phòng chơi với bạn bè.',
     credits: 'Hình quân cờ cburnett của Colin M.L. Burnett (GPLv2+).',
     legal: [{ label: 'Giấy phép Stockfish (GPLv3)', href: 'stockfish/Copying.txt' }],
   },

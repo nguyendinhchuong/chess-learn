@@ -1,13 +1,13 @@
 // Khung chung của hai trang giới thiệu (cờ vua, cờ tướng): thanh điều hướng nổi, phần mở đầu với bàn cờ 3D,
-// số liệu, lộ trình bốn chặng cuộn theo nước đi, câu tuyên ngôn sáng dần theo từng chữ, lợi ích, ba bước,
-// hỏi đáp và lời mời cuối trang. Nội dung riêng của từng môn nằm trong ChessLanding/XqLanding.
+// số liệu, lộ trình bốn chặng cuộn theo nước đi, phòng chơi với bạn, câu tuyên ngôn sáng dần theo từng chữ,
+// lợi ích, ba bước và lời mời cuối trang. Nội dung riêng của từng môn nằm trong ChessLanding/XqLanding.
 import { ComponentType, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, MouseSimple, Plus, SealCheck, ShieldCheck } from '@phosphor-icons/react';
+import { ArrowRight, MouseSimple, SealCheck, ShieldCheck } from '@phosphor-icons/react';
 import { href } from '../lib/router';
 import { Scene, SceneProps } from './Scene';
 import { AssembleBoard } from './FlatBoard';
 import { Kind, PieceFace, pieceHtml } from './pieces';
-import { ProgressSource, createSource } from './Stages';
+import { ProgressSource, RoomDemo, RoomStage, createSource, roomFrames } from './Stages';
 import { clamp, curtainTo, ease, passProgress, reducedMotion, useFrame, useInView, useMedia, useReveal } from './motion';
 
 export interface Station {
@@ -30,23 +30,38 @@ export interface LandingConfig {
   other: { name: string; to: string; kind: Kind; glyph: string; color: string };
   cta: { label: string; to: string };
   appLinks: { label: string; to: string }[];
-  hero: { eyebrow: string; title: string[]; sub: string; proof: string; scene: Omit<SceneProps, 'scatterRef' | 'tiltRef'> };
+  /** announce: dòng giới thiệu tính năng mới trên phần mở đầu, bấm vào thì cuộn tới phần Chơi với bạn */
+  hero: { announce: string; title: string[]; sub: string; proof: string; scene: Omit<SceneProps, 'scatterRef' | 'tiltRef'> };
   stats: { value: number; label: string }[];
   journey: { kicker: string; title: string[]; sub: string; hopper: string; stations: Station[] };
+  online: {
+    kicker: string;
+    title: string[];
+    sub: string;
+    /** Bốn ý, theo thứ tự các khung hình của phòng minh họa: mời, trọng tài, rớt mạng, kết thúc ván */
+    items: { icon: ReactNode; title: string; text: string }[];
+    cta: { label: string; to: string };
+    note: string;
+    room: RoomDemo;
+  };
   tagline: string[];
   benefits: { kicker: string; title: string[]; items: { icon: ReactNode; title: string; text: string }[] };
   steps: { kicker: string; title: string[]; items: { title: string; text: string; link: { label: string; to: string } }[] };
-  faq: { kicker: string; title: string[]; items: { id?: string; q: string; a: string }[] };
   final: { title: string[]; sub: string; note: string; fen: string; boardLabel: string };
   footer: { blurb: string; credits: string; legal: { label: string; href: string }[] };
 }
 
+const ONLINE_ID = 'choi-voi-ban';
+
 const SECTIONS: [string, string][] = [
   ['lo-trinh', 'Lộ trình'],
+  [ONLINE_ID, 'Chơi với bạn'],
   ['loi-ich', 'Lợi ích'],
   ['ba-buoc', 'Ba bước'],
-  ['hoi-dap', 'Hỏi đáp'],
 ];
+
+const PRIVACY =
+  'Tiến độ học, bài đã giải và thành tích đấu máy chỉ lưu trên trình duyệt của bạn. Khi bạn chơi với bạn bè, máy chủ phòng chơi giữ tên bạn nhập, một mã ngẫu nhiên để nhận ra ghế của bạn, các nước đi và đồng hồ của ván. Phòng bị xóa sau 3 ngày không ai chơi.';
 
 /** Tiêu đề nhiều dòng: ngắt dòng ở chỗ ý thay đổi (trên màn hình hẹp thì tự xuống dòng) */
 function Lines({ lines }: { lines: string[] }) {
@@ -205,9 +220,11 @@ function Hero({ cfg }: { cfg: LandingConfig }) {
   return (
     <section ref={hero} className="ld-hero" id="dau-trang" aria-labelledby="ld-hero-title">
       <div ref={copy} className="ld-hero-copy">
-        <span className="ld-eyebrow ld-enter" style={{ animationDelay: '80ms' }}>
-          {h.eyebrow}
-        </span>
+        <button type="button" className="ld-eyebrow ld-announce ld-enter" style={{ animationDelay: '80ms' }} onClick={() => scrollToId(ONLINE_ID)}>
+          <span className="ld-badge">Mới</span>
+          {h.announce}
+          <ArrowRight size={14} weight="bold" aria-hidden="true" />
+        </button>
         <h1 id="ld-hero-title" className="ld-h1 ld-gradient ld-enter" style={{ animationDelay: '160ms' }}>
           <Lines lines={h.title} />
         </h1>
@@ -392,6 +409,124 @@ function Journey({ cfg }: { cfg: LandingConfig }) {
   );
 }
 
+/* ---------- Chơi với bạn: phòng minh họa dính trên màn hình, đi từng khung theo nhịp cuộn ---------- */
+
+function Online({ cfg }: { cfg: LandingConfig }) {
+  const o = cfg.online;
+  const frames = useMemo(() => roomFrames(o.room), [o.room]);
+  const desktop = useMedia('(min-width: 960px)');
+  const section = useRef<HTMLElement>(null);
+  const items = useRef<(HTMLLIElement | null)[]>([]);
+  const pin = useRef<HTMLDivElement>(null);
+  const sticky = useRef<HTMLDivElement>(null);
+  const inView = useInView(section, '0px');
+  const [idx, setIdx] = useState(0);
+  const cur = useRef({ idx: 0, next: 0 });
+  // khung đầu và số khung của từng ý trong danh sách
+  const spans = useMemo(
+    () =>
+      o.items.map((_, i) => {
+        const start = frames.findIndex((f) => f.phase === i);
+        return { start, len: frames.filter((f) => f.phase === i).length };
+      }),
+    [frames, o.items],
+  );
+  const link = useMemo(() => {
+    const u = new URL(window.location.href);
+    u.hash = `${cfg.kind === 'xq' ? '/co-tuong' : ''}/phong/${o.room.code}`;
+    return u.host + u.pathname.replace(/\/$/, '') + '/' + u.hash;
+  }, [cfg.kind, o.room.code]);
+
+  useFrame(
+    {
+      read: () => {
+        const c = cur.current;
+        if (desktop) {
+          // màn hình rộng: ý đang đi qua giữa màn hình quyết định đoạn, vị trí trong ý quyết định khung
+          const line = window.innerHeight * 0.55;
+          const rects = items.current.map((el) => el?.getBoundingClientRect());
+          let i = 0;
+          rects.forEach((r, k) => {
+            if (r && r.top <= line) i = k;
+          });
+          const r = rects[i];
+          const sp = spans[i];
+          if (!r || !sp) return;
+          const p = clamp((line - r.top) / r.height);
+          c.next = sp.start + Math.min(sp.len - 1, Math.floor(p * sp.len));
+        } else {
+          // màn hình hẹp: phòng dính lại, quãng cuộn bên dưới chia đều cho các khung
+          const pr = pin.current?.getBoundingClientRect();
+          const sr = sticky.current?.getBoundingClientRect();
+          if (!pr || !sr) return;
+          const p = clamp((sr.top - pr.top) / Math.max(1, pr.height - sr.height));
+          c.next = Math.min(frames.length - 1, Math.floor(p * frames.length));
+        }
+      },
+      write: () => {
+        const c = cur.current;
+        if (c.next !== c.idx) {
+          c.idx = c.next;
+          setIdx(c.next);
+        }
+      },
+    },
+    inView,
+  );
+
+  const frame = frames[idx];
+  return (
+    <section ref={section} id={ONLINE_ID} className="ld-section ld-online" aria-labelledby="ld-online-title">
+      <header className="ld-head" data-reveal>
+        <span className="ld-kicker">
+          <span className="ld-badge">Mới</span>
+          {o.kicker}
+        </span>
+        <h2 id="ld-online-title" className="ld-h2" tabIndex={-1} data-focus>
+          <Lines lines={o.title} />
+        </h2>
+        <p className="ld-lead">{o.sub}</p>
+      </header>
+      <div className="ld-online-grid">
+        <ol className="ld-online-list">
+          {o.items.map((it, i) => (
+            <li
+              key={it.title}
+              ref={(el) => (items.current[i] = el)}
+              className={'ld-online-item' + (frame.phase === i ? ' on' : '')}
+              style={{ ['--frames' as string]: spans[i]?.len ?? 1 }}
+            >
+              <div className="ld-online-copy" data-reveal>
+                <span className="ld-benefit-ic" aria-hidden="true">
+                  {it.icon}
+                </span>
+                <h3 className="ld-h4">{it.title}</h3>
+                <p>{it.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div ref={pin} className="ld-room-pin">
+          <div ref={sticky} className="ld-room-sticky">
+            <RoomStage demo={o.room} frame={frame} link={link} />
+          </div>
+          <div className="ld-room-run" aria-hidden="true" />
+        </div>
+        <div className="ld-online-cta" data-reveal>
+          <a className="ld-btn quiet" href={href(o.cta.to)}>
+            {o.cta.label}
+            <ArrowRight size={18} weight="bold" aria-hidden="true" />
+          </a>
+          <p className="ld-proof">
+            <ShieldCheck size={18} weight="fill" aria-hidden="true" />
+            {o.note}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Câu tuyên ngôn: từng chữ sáng lên khi cuộn qua ---------- */
 
 function Tagline({ lines }: { lines: string[] }) {
@@ -516,32 +651,6 @@ function Steps({ s }: { s: LandingConfig['steps'] }) {
   );
 }
 
-function Faq({ f }: { f: LandingConfig['faq'] }) {
-  return (
-    <section id="hoi-dap" className="ld-section ld-faq-section" aria-labelledby="ld-faq-title">
-      <header className="ld-head" data-reveal>
-        <span className="ld-kicker">{f.kicker}</span>
-        <h2 id="ld-faq-title" className="ld-h2" tabIndex={-1} data-focus>
-          <Lines lines={f.title} />
-        </h2>
-      </header>
-      <div className="ld-faq">
-        {f.items.map((it) => (
-          <details key={it.q} id={it.id} className="ld-faq-item" data-reveal>
-            <summary>
-              <span>{it.q}</span>
-              <Plus className="ld-faq-ic" size={20} weight="bold" aria-hidden="true" />
-            </summary>
-            <div className="ld-faq-a">
-              <p>{it.a}</p>
-            </div>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function Final({ cfg }: { cfg: LandingConfig }) {
   const ref = useRef<HTMLElement>(null);
   const f = cfg.final;
@@ -569,12 +678,11 @@ function Final({ cfg }: { cfg: LandingConfig }) {
 }
 
 function Footer({ cfg }: { cfg: LandingConfig }) {
-  const privacy = () => {
-    const d = document.getElementById('quyen-rieng-tu') as HTMLDetailsElement | null;
-    if (d) d.open = true;
-    d?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
-    d?.querySelector('summary')?.focus({ preventScroll: true });
-  };
+  const [privacy, setPrivacy] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (privacy) panel.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
+  }, [privacy]);
   return (
     <footer className="ld-footer">
       <div className="ld-footer-grid">
@@ -607,7 +715,7 @@ function Footer({ cfg }: { cfg: LandingConfig }) {
       <div className="ld-footer-bottom">
         <span>© 2026 Kỳ Đạo. {cfg.footer.credits}</span>
         <span className="ld-footer-legal">
-          <button type="button" onClick={privacy}>
+          <button type="button" aria-expanded={privacy} aria-controls="quyen-rieng-tu" onClick={() => setPrivacy(!privacy)}>
             Quyền riêng tư
           </button>
           {cfg.footer.legal.map((l) => (
@@ -616,6 +724,10 @@ function Footer({ cfg }: { cfg: LandingConfig }) {
             </a>
           ))}
         </span>
+      </div>
+      <div ref={panel} id="quyen-rieng-tu" className="ld-privacy" hidden={!privacy}>
+        <h2 className="ld-footer-h">Quyền riêng tư</h2>
+        <p>{PRIVACY}</p>
       </div>
     </footer>
   );
@@ -667,10 +779,10 @@ export function Landing({ cfg }: { cfg: LandingConfig }) {
           <Stats items={cfg.stats} />
         </div>
         <Journey cfg={cfg} />
+        <Online cfg={cfg} />
         <Tagline lines={cfg.tagline} />
         <Benefits b={cfg.benefits} />
         <Steps s={cfg.steps} />
-        <Faq f={cfg.faq} />
         <Final cfg={cfg} />
       </main>
       <Footer cfg={cfg} />

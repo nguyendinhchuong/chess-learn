@@ -1,7 +1,8 @@
-// Bốn chặng của lộ trình trên trang giới thiệu: bản đồ trang, bài học, ván mẫu, đấu với máy.
+// Bốn chặng của lộ trình trên trang giới thiệu: bản đồ trang, bài học, ván mẫu, đấu với máy,
+// và phòng chơi minh họa của phần "Chơi với bạn".
 // Mỗi chặng nhận tiến độ cuộn 0..1 và chỉ vẽ lại khi bước rời rạc (nước đi, ô, cấp độ) thay đổi.
-import { ReactNode, useSyncExternalStore } from 'react';
-import { CheckCircle } from '@phosphor-icons/react';
+import { ReactNode, useMemo, useSyncExternalStore } from 'react';
+import { Check, CheckCircle, Copy, Handshake, WifiSlash } from '@phosphor-icons/react';
 import { href } from '../lib/router';
 import { FlatBoard, Arrow } from './FlatBoard';
 import { Kind, Line, PieceFace } from './pieces';
@@ -220,6 +221,146 @@ export function LadderStage({ bots, reviews, hopper, kind, coach, progress }: St
           <span style={{ transform: `scaleX(${rv.win})` }} />
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ---------- Chơi với bạn: một phòng chơi từ lúc gửi lời mời tới lời đề nghị hòa ---------- */
+
+export interface RoomDemo {
+  line: Line;
+  sans: string[];
+  code: string;
+  /** Nhãn thời gian hiện ở đầu phòng, VD "10 phút + 5 giây" */
+  time: string;
+  /** Thời gian ban đầu và thời gian cộng thêm mỗi nước (giây) */
+  clock: number;
+  inc: number;
+  /** Số giây mỗi nửa nước suy nghĩ (hai nước đầu không tính giờ, như phòng thật) */
+  think: number[];
+  sides: [string, string];
+  /** Hình đại diện mỗi bên: quân Vua/Tướng */
+  kings: [string, string];
+  you: string;
+  friend: string;
+}
+
+export interface RoomFrame {
+  ply: number;
+  joined: boolean;
+  copied: boolean;
+  net: 'on' | 'off' | 'back';
+  draw: boolean;
+  /** Ý đang minh họa trong danh sách bên cạnh (0..3) */
+  phase: number;
+  status: string;
+}
+
+/** Các khung hình của phòng minh họa, theo thứ tự cuộn: mời, vào phòng và đi quân, rớt mạng, đề nghị hòa */
+export function roomFrames(d: RoomDemo): RoomFrame[] {
+  const n = d.line.plies;
+  const a = Math.round(n / 2),
+    b = Math.round((n * 3) / 4);
+  const base = { joined: true, copied: true, net: 'on' as const, draw: false };
+  const move = (p: number, phase: number): RoomFrame => ({
+    ...base,
+    ply: p,
+    phase,
+    status: p % 2 ? `Máy chủ nhận nước ${d.sans[p - 1]} của bạn. Chờ ${d.friend} đi.` : `${d.friend} đi ${d.sans[p - 1]}. Đến lượt bạn.`,
+  });
+  const range = (from: number, to: number, phase: number) => Array.from({ length: to - from + 1 }, (_, i) => move(from + i, phase));
+  return [
+    { ...base, ply: 0, joined: false, copied: false, phase: 0, status: 'Phòng đã sẵn sàng. Chép đường dẫn mời để gửi cho bạn của bạn.' },
+    { ...base, ply: 0, joined: false, phase: 0, status: 'Đã chép đường dẫn. Dán vào tin nhắn là xong.' },
+    { ...base, ply: 0, phase: 1, status: `${d.friend} đã vào phòng. Ván cờ bắt đầu, bạn đi trước.` },
+    ...range(1, a, 1),
+    { ...base, ply: a, net: 'off', phase: 2, status: 'Mất kết nối, đang kết nối lại. Ván cờ vẫn được giữ trên máy chủ.' },
+    { ...base, ply: a, net: 'back', phase: 2, status: 'Đã kết nối lại: đúng thế cờ, đúng thời gian còn lại.' },
+    ...range(a + 1, b, 2),
+    ...range(b + 1, n, 3),
+    { ...base, ply: n, draw: true, phase: 3, status: `${d.friend} đề nghị hòa. Bạn đồng ý, hoặc từ chối để đánh tiếp.` },
+  ];
+}
+
+const clockText = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+export function RoomStage({ demo, frame, link }: { demo: RoomDemo; frame: RoomFrame; link: string }) {
+  const kind = demo.line.kind;
+  // đồng hồ hai bên sau từng nửa nước
+  const clocks = useMemo(() => {
+    const c: [number, number][] = [[demo.clock, demo.clock]];
+    for (let p = 1; p <= demo.line.plies; p++) {
+      const next: [number, number] = [...c[p - 1]];
+      if (p > 2) next[(p - 1) % 2] += demo.inc - (demo.think[p - 1] ?? 0);
+      c.push(next);
+    }
+    return c;
+  }, [demo]);
+  const f = frame;
+  const running = f.joined && f.ply >= 2 ? f.ply % 2 : -1;
+
+  const seat = (s: 0 | 1) => {
+    const seated = s === 0 || f.joined;
+    const online = s === 0 ? f.net !== 'off' : f.joined;
+    return (
+      <div className={'ld-seat' + (running === s ? ' turn' : '') + (seated ? '' : ' empty')}>
+        <span className={'ld-seat-av ' + kind}>{seated && <PieceFace k={demo.kings[s]} kind={kind} />}</span>
+        <span className="ld-seat-main">
+          <span className="ld-seat-name">
+            <span className="ld-seat-text">{seated ? (s === 0 ? demo.you : demo.friend) : 'Đang chờ người chơi…'}</span>
+            {s === 0 && <span className="ld-seat-tag">Bạn</span>}
+            {seated && <span className={'ld-presence' + (online ? ' on' : '')} />}
+          </span>
+          <span className="ld-muted">Cầm quân {demo.sides[s]}</span>
+        </span>
+        <span className="ld-clock">{clockText(clocks[f.ply][s])}</span>
+      </div>
+    );
+  };
+
+  return (
+    <div className={'ld-room ' + kind}>
+      <div className="ld-room-head">
+        <span className="ld-room-name">Phòng {demo.code}</span>
+        <span className="ld-muted">{demo.time}</span>
+      </div>
+      {seat(1)}
+      <div className={'ld-room-board' + (!f.joined || f.net === 'off' ? ' dim' : '')}>
+        <FlatBoard line={demo.line} ply={f.ply} label={`Phòng ${demo.code}: ${f.joined ? `bạn và ${demo.friend}, sau nửa nước thứ ${f.ply}` : 'đang chờ người chơi thứ hai'}`} />
+        <div aria-hidden="true" className={'ld-room-pop ld-room-invite' + (f.joined ? '' : ' on')}>
+          <span className="ld-bubble-name">Mời bạn vào phòng</span>
+          <span className="ld-room-code">{demo.code}</span>
+          <span className="ld-room-link">
+            <span className="ld-room-url">{link}</span>
+            <span className={'ld-room-copy' + (f.copied ? ' done' : '')}>
+              {f.copied ? <Check size={14} weight="bold" aria-hidden="true" /> : <Copy size={14} weight="bold" aria-hidden="true" />}
+              {f.copied ? 'Đã chép' : 'Chép'}
+            </span>
+          </span>
+        </div>
+        <div aria-hidden="true" className={'ld-room-pop ld-room-net bad' + (f.net === 'off' ? ' on' : '')}>
+          <WifiSlash size={16} weight="bold" aria-hidden="true" />
+          Mất kết nối, đang kết nối lại…
+        </div>
+        <div aria-hidden="true" className={'ld-room-pop ld-room-net good' + (f.net === 'back' ? ' on' : '')}>
+          <CheckCircle size={16} weight="fill" aria-hidden="true" />
+          Đã kết nối lại
+        </div>
+        <div aria-hidden="true" className={'ld-room-pop ld-room-offer' + (f.draw ? ' on' : '')}>
+          <span className="ld-room-offer-text">
+            <Handshake size={18} weight="bold" aria-hidden="true" />
+            {demo.friend} đề nghị hòa
+          </span>
+          <span className="ld-room-chips">
+            <span className="ld-room-chip primary">Đồng ý hòa</span>
+            <span className="ld-room-chip">Từ chối</span>
+          </span>
+        </div>
+      </div>
+      {seat(0)}
+      <p key={f.status} className="ld-room-status" aria-live="polite">
+        {f.status}
+      </p>
     </div>
   );
 }

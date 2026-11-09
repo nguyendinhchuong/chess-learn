@@ -250,6 +250,44 @@ html.ld-lock {
   font-weight: 600;
   color: var(--text-2);
 }
+/* Dòng giới thiệu tính năng mới trên phần mở đầu: bấm để cuộn tới phần đó */
+.ld-announce {
+  gap: var(--sp-75);
+  padding-left: var(--sp-50);
+  color: var(--text);
+  text-align: left;
+  transition:
+    background-color 300ms var(--ease),
+    border-color 300ms var(--ease),
+    transform 500ms var(--ease);
+}
+.ld-announce svg {
+  flex: none;
+  color: var(--text-2);
+  transition: transform 500ms var(--ease);
+}
+.ld-announce:hover {
+  background: var(--surface-3);
+  border-color: var(--line-2);
+}
+.ld-announce:hover svg {
+  transform: translateX(4px);
+}
+.ld-announce:active {
+  transform: scale(0.98);
+}
+.ld-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--sp-75);
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 600;
+}
 
 /* ---------- Nút và liên kết ---------- */
 .ld-btn {
@@ -278,6 +316,15 @@ html.ld-lock {
 }
 .ld-root .ld-btn.primary:hover {
   background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.ld-root .ld-btn.quiet {
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--text);
+}
+.ld-root .ld-btn.quiet:hover {
+  background: var(--surface-4);
   transform: translateY(-1px);
 }
 .ld-root .ld-btn:active {
@@ -1628,62 +1675,371 @@ a.ld-switch-item:hover {
   }
 }
 
-/* ---------- Hỏi đáp ---------- */
-.ld-faq {
+/* ---------- Chơi với bạn ---------- */
+.ld-online-grid {
+  display: grid;
+  gap: var(--sp-600);
+}
+.ld-online-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-400);
+}
+.ld-online-copy {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-75);
-  max-width: 880px;
+  gap: var(--sp-100);
+  max-width: 520px;
 }
-.ld-faq-item {
-  border-radius: var(--r-2xl);
+.ld-online-copy p {
+  color: var(--text-2);
+}
+.ld-online-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-200);
+}
+/* Màn hình hẹp: phòng minh họa đứng trước danh sách, dính lại trong một quãng cuộn để đi hết các khung */
+.ld-room-pin {
+  order: -1;
+  position: relative;
+}
+.ld-room-sticky {
+  position: sticky;
+  top: var(--sp-800);
+  display: flex;
+  justify-content: center;
+}
+.ld-room-run {
+  height: 110vh;
+}
+@media (min-width: 960px) {
+  .ld-online-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: var(--sp-700);
+    row-gap: var(--sp-600);
+  }
+  .ld-online-list {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 0;
+  }
+  /* chừa đủ quãng cuộn để phòng còn dính khi khung cuối hiện ra */
+  .ld-online-cta {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: calc(50vh - var(--sp-800));
+  }
+  .ld-room-pin {
+    order: 0;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .ld-room-sticky {
+    top: var(--sp-900);
+  }
+  .ld-room-run {
+    display: none;
+  }
+  .ld-online-item {
+    min-height: calc(var(--frames) * 14vh);
+  }
+  .ld-online-copy {
+    position: sticky;
+    top: 30vh;
+    padding-bottom: var(--sp-600);
+    transition:
+      opacity 700ms var(--ease),
+      translate 700ms var(--ease);
+  }
+  .ld-online-item:not(.on) .ld-online-copy[data-shown] {
+    opacity: 0.3;
+  }
+}
+
+/* Phòng minh họa: bàn cờ, hai người chơi với đồng hồ, lời mời và các thông báo nổi trên bàn */
+.ld-room {
+  --ar: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-100);
+  width: min(100%, 520px, max(280px, calc((100vh - 400px) * var(--ar) + 48px)));
+  width: min(100%, 520px, max(280px, calc((100svh - 400px) * var(--ar) + 48px)));
+  padding: var(--sp-200);
+  border-radius: var(--r-3xl);
   background: var(--surface);
   border: 1px solid var(--line);
-  scroll-margin-top: var(--sp-900);
-  transition: border-color 300ms var(--ease);
 }
-.ld-faq-item:hover,
-.ld-faq-item[open] {
-  border-color: var(--line-2);
+.ld-room.xq {
+  --ar: 0.9;
 }
-.ld-faq-item summary {
+.ld-room-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: var(--sp-200);
-  padding: var(--sp-200);
-  list-style: none;
-  cursor: pointer;
+  align-items: baseline;
+  gap: var(--sp-100);
+  font-size: 14px;
+  line-height: 20px;
+}
+.ld-room-name {
   font-weight: 600;
-  border-radius: var(--r-2xl);
 }
-.ld-faq-item summary::-webkit-details-marker {
-  display: none;
+.ld-seat {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-100);
+  padding: var(--sp-75);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  transition:
+    background-color 300ms var(--ease),
+    border-color 300ms var(--ease);
 }
-.ld-faq-ic {
+.ld-seat.turn {
+  background: var(--surface-3);
+  border-color: var(--line-2);
+}
+.ld-seat-av {
   flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  background: var(--surface-4);
+}
+.ld-seat-av .ld-sprite {
+  width: 28px;
+  height: 28px;
+}
+.ld-seat-av .ld-disc {
+  width: 30px;
+  height: 30px;
+}
+.ld-seat.empty .ld-seat-av {
+  background: none;
+  border: 1px dashed var(--line-2);
+}
+.ld-seat-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 20px;
+}
+.ld-seat-main .ld-muted {
+  font-size: 12px;
+  line-height: 16px;
+}
+.ld-seat-name {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-75);
+  min-width: 0;
+  font-weight: 600;
+}
+.ld-seat-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ld-seat.empty .ld-seat-text {
   color: var(--text-2);
-  transition: transform 500ms var(--ease);
+  font-weight: 400;
 }
-.ld-faq-item[open] .ld-faq-ic {
-  transform: rotate(45deg);
+.ld-seat-tag {
+  flex: none;
+  padding: 0 var(--sp-50);
+  border-radius: var(--r);
+  background: var(--surface-4);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 16px;
 }
-.ld-faq-a {
-  padding: 0 var(--sp-200) var(--sp-200);
+.ld-presence {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  background: var(--surface-4);
+  transition: background-color 300ms var(--ease);
+}
+.ld-presence.on {
+  background: var(--good);
+}
+.ld-clock {
+  flex: none;
+  padding: var(--sp-50) var(--sp-100);
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 300ms var(--ease),
+    color 300ms var(--ease);
+}
+.ld-seat.turn .ld-clock {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.ld-room-board {
+  position: relative;
+  padding: var(--sp-75);
+}
+.ld-room-board .ld-fb {
+  transition: opacity 500ms var(--ease);
+}
+.ld-room-board.dim .ld-fb {
+  opacity: 0.35;
+}
+.ld-room-pop {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  opacity: 0;
+  translate: -50% 12px;
+  pointer-events: none;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  transition:
+    opacity 500ms var(--ease),
+    translate 500ms var(--ease);
+}
+.ld-room-pop.on {
+  opacity: 1;
+  translate: -50% 0;
+}
+.ld-room-invite {
+  top: 50%;
+  translate: -50% calc(-50% + 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-100);
+  width: calc(100% - var(--sp-600));
+  max-width: 360px;
+  padding: var(--sp-300);
+  border-radius: var(--r-2xl);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  text-align: center;
+}
+.ld-room-invite.on {
+  translate: -50% -50%;
+}
+.ld-room-code {
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+.ld-room-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-75);
+  width: 100%;
+  padding: var(--sp-50) var(--sp-50) var(--sp-50) var(--sp-100);
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+}
+.ld-room-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 12px;
+  line-height: 16px;
   color: var(--text-2);
 }
-.ld-faq-item[open] .ld-faq-a {
+.ld-room-copy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-50);
+  padding: var(--sp-50) var(--sp-100);
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  transition:
+    background-color 300ms var(--ease),
+    color 300ms var(--ease);
+}
+.ld-room-copy.done {
+  background: var(--good);
+  color: #000000;
+}
+.ld-room-net {
+  top: var(--sp-300);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-75);
+  padding: var(--sp-75) var(--sp-200);
+  border-radius: var(--r-full);
+  background: var(--surface-4);
+  border: 1px solid var(--line-2);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ld-room-net.bad svg {
+  color: var(--bad);
+}
+.ld-room-net.good svg {
+  color: var(--good);
+}
+.ld-room-offer {
+  bottom: var(--sp-300);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-100);
+  padding: var(--sp-200);
+  border-radius: var(--r-2xl);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  white-space: nowrap;
+}
+.ld-room-offer-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-75);
+  font-weight: 600;
+}
+.ld-room-chips {
+  display: flex;
+  gap: var(--sp-75);
+}
+.ld-room-chip {
+  padding: var(--sp-50) var(--sp-100);
+  border-radius: var(--r-full);
+  background: var(--surface-4);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.ld-room-chip.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.ld-room-status {
+  min-height: 40px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-2);
   animation: ld-fade-up 500ms var(--ease) both;
-}
-@media (min-width: 768px) {
-  .ld-faq-item summary {
-    padding: var(--sp-300);
-    font-size: 18px;
-    line-height: 28px;
-  }
-  .ld-faq-a {
-    padding: 0 var(--sp-300) var(--sp-300);
-  }
 }
 
 /* ---------- Lời mời cuối trang ---------- */
@@ -1797,6 +2153,20 @@ a.ld-switch-item:hover {
 .ld-footer-legal > * {
   font-size: 12px;
   line-height: 16px;
+}
+.ld-privacy {
+  margin-top: var(--sp-300);
+  padding: var(--sp-300);
+  border-radius: var(--r-3xl);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  scroll-margin-bottom: var(--sp-300);
+}
+.ld-privacy p {
+  max-width: 680px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-2);
 }
 @media (min-width: 768px) {
   .ld-footer-grid {
@@ -2099,8 +2469,15 @@ a.ld-switch-item:hover {
   .ld-bubble-text,
   .ld-game-caption,
   .ld-review-body,
-  .ld-faq-item[open] .ld-faq-a {
+  .ld-room-status {
     animation-name: ld-fade;
+  }
+  .ld-room-pop {
+    translate: -50% 0;
+  }
+  .ld-room-invite,
+  .ld-room-invite.on {
+    translate: -50% -50%;
   }
   .ld-root [data-reveal] {
     translate: none;
