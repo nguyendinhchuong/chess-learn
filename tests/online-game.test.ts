@@ -135,6 +135,29 @@ describe('đồng hồ', () => {
     play(room, ['e2e4', 'e7e5']);
     expect(checkFlag(room, T0 + 10 * ROOM_TTL_MS)).toBe(false);
     expect(view(room, A, T0, [true, true]).room.clocks).toBeNull();
+    expect(view(room, A, T0, [true, true]).room.clockLog).toBeUndefined();
+  });
+
+  it('ghi thời gian còn lại của bên vừa đi sau từng nước (cho biên bản), ván mới thì ghi lại từ đầu', () => {
+    const room = started('chess', tc);
+    handle(room, A, { t: 'move', ply: 0, uci: 'e2e4' }, T0 + 30_000);
+    handle(room, B, { t: 'move', ply: 1, uci: 'e7e5' }, T0 + 50_000);
+    handle(room, A, { t: 'move', ply: 2, uci: 'g1f3' }, T0 + 60_000);
+    handle(room, B, { t: 'move', ply: 3, uci: 'b8c6' }, T0 + 75_000);
+    expect(room.clockLog).toEqual([60_000, 60_000, 52_000, 47_000]);
+    expect(view(room, A, T0 + 75_000, [true, true]).room.clockLog).toEqual([60_000, 60_000, 52_000, 47_000]);
+    handle(room, A, { t: 'resign' }, T0 + 80_000);
+    handle(room, A, { t: 'rematch' }, T0 + 81_000);
+    handle(room, B, { t: 'rematch' }, T0 + 82_000);
+    expect(room.clockLog).toEqual([]);
+  });
+
+  it('phòng tạo từ máy chủ cũ (chưa có nhật ký đồng hồ) không gửi nhật ký lệch nước', () => {
+    const room = started('chess', tc);
+    delete room.clockLog;
+    play(room, ['e2e4', 'e7e5', 'g1f3']);
+    expect(room.clockLog).toBeUndefined();
+    expect(view(room, A, T0, [true, true]).room.clockLog).toBeUndefined();
   });
 });
 
