@@ -55,6 +55,11 @@ export interface PublicRoom {
   clocks: [number, number] | null;
   /** Bên đang chạy đồng hồ (null: chưa chạy – hai nước đầu không tính giờ – hoặc ván đã kết thúc) */
   running: Side | null;
+  /**
+   * Thời gian còn lại (ms) của bên vừa đi, ghi ngay sau từng nước (cùng độ dài với `moves`).
+   * Không có khi phòng không tính giờ hoặc máy chủ phòng là bản cũ.
+   */
+  clockLog?: number[];
   status: RoomStatus;
   result: Result | null;
   reason: EndReason | null;

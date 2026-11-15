@@ -21,6 +21,7 @@ const XqRoutes = lazy(() => import('./xiangqi/XqRoutes'));
 const Welcome = lazy(() => import('./landing/Welcome'));
 const ChessLanding = lazy(() => import('./landing/ChessLanding'));
 const XqLanding = lazy(() => import('./landing/XqLanding'));
+const ChessAnalysis = lazy(() => import('./analysis/ChessAnalysisRoute'));
 const XQ = '/co-tuong';
 
 type Game = 'chess' | 'xq';
@@ -66,6 +67,12 @@ function chessPage(section: string, id: string | undefined, query: URLSearchPara
     case 'luyen-tap':
       return <Play query={query} />;
     case 'phong':
+      if (id === 'phan-tich')
+        return (
+          <Suspense fallback={<div className="empty-state">Đang mở trang phân tích…</div>}>
+            <ChessAnalysis />
+          </Suspense>
+        );
       return id ? <OnlineRoom kit={CHESS_KIT} code={id} /> : <OnlineLobby kit={CHESS_KIT} />;
     default:
       return null;

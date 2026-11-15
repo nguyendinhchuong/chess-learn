@@ -35,6 +35,8 @@ export interface RoomState {
   clocks: [number, number] | null;
   /** Lúc đồng hồ của bên đang đi bắt đầu chạy; null khi chưa chạy (hai nước đầu), không tính giờ hoặc ván đã xong */
   turnStartedAt: number | null;
+  /** Thời gian còn lại của bên vừa đi sau từng nước (phòng tạo từ bản máy chủ cũ thì không có) */
+  clockLog?: number[];
   status: RoomStatus;
   result: Result | null;
   reason: EndReason | null;
@@ -115,6 +117,7 @@ export function createRoom(code: string, req: CreateRoomRequest, now: number, ra
     moves: [],
     clocks: req.time ? [req.time.initial, req.time.initial] : null,
     turnStartedAt: null,
+    clockLog: [],
     status: 'waiting',
     result: null,
     reason: null,
@@ -178,6 +181,7 @@ function startGame(room: RoomState) {
   room.moves = [];
   room.clocks = room.time ? [room.time.initial, room.time.initial] : null;
   room.turnStartedAt = null;
+  room.clockLog = [];
   room.result = null;
   room.reason = null;
   room.drawOffer = null;
@@ -213,6 +217,8 @@ export function handle(room: RoomState, token: string | null, msg: ClientMessage
         room.clocks[side] = Math.max(0, room.clocks[side] - (now - room.turnStartedAt)) + room.time.increment;
       }
       pos.make(m);
+      // nhật ký đồng hồ chỉ có nghĩa khi khớp từng nước (phòng cũ chưa có nhật ký thì bỏ qua)
+      if (room.clocks && room.clockLog?.length === room.moves.length) room.clockLog.push(room.clocks[side]);
       room.moves.push(msg.uci);
       // đi một nước thay cho trả lời lời mời hòa = từ chối
       if (room.drawOffer === 1 - side) room.drawOffer = null;
@@ -281,6 +287,7 @@ export function view(room: RoomState, token: string | null, now: number, online:
       moves: [...room.moves],
       clocks,
       running,
+      ...(room.clocks && room.clockLog?.length === room.moves.length ? { clockLog: [...room.clockLog] } : {}),
       status: room.status,
       result: room.result,
       reason: room.reason,

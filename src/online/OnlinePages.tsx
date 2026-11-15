@@ -2,13 +2,15 @@
 // Dùng chung cho hai môn cờ; phần riêng của từng môn nằm trong OnlineKit.
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Copy, ShareNetwork, SignIn, UsersThree, X } from '@phosphor-icons/react';
+import { ChartLineUp, ClipboardText, Copy, DownloadSimple, ShareNetwork, SignIn, UsersThree, X } from '@phosphor-icons/react';
 import { href, navigate } from '../lib/router';
 import { useStored } from '../lib/storage';
 import { sounds } from '../lib/sound';
 import { createRoom, playerToken, roomLink, useRoom } from './client';
 import type { OnlineKit } from './kit';
 import { CODE_RE, ErrorCode, NAME_MAX, normalizeCode, PublicRoom, RoomStatus, Side, TIME_PRESETS, timeLabel } from './protocol';
+import { downloadText, endDetail, openAnalysis, rememberGame, roomGame, useGameHistory, type SavedGame } from '../analysis/history';
+import { sheetFileName } from '../analysis/sheet';
 
 const ERROR_TEXT: Partial<Record<ErrorCode, string>> = {
   illegal: 'Nước đi không hợp lệ.',
@@ -119,6 +121,8 @@ export function OnlineLobby({ kit }: { kit: OnlineKit }) {
         </form>
       </div>
 
+      <AnalysisCard kit={kit} />
+
       {error && (
         <div className="callout warn" role="alert">
           <span className="ci">⚠️</span>
@@ -143,6 +147,28 @@ export function OnlineLobby({ kit }: { kit: OnlineKit }) {
           <span>{busy ? 'Đang tạo phòng…' : 'Tạo phòng'}</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Lối vào trang phân tích: số ván đã lưu và nút nhập biên bản */
+function AnalysisCard({ kit }: { kit: OnlineKit }) {
+  const [history] = useGameHistory();
+  const mine = history.filter((g) => g.variant === kit.variant);
+  return (
+    <div className="card online-invite" style={{ marginTop: 22 }}>
+      <div className="oi-text">
+        <h3>📊 Phân tích ván đã chơi</h3>
+        <p className="muted small" style={{ margin: 0 }}>
+          Mỗi ván chơi xong được lưu lại trên trình duyệt này kèm biên bản (tệp .pgn) để tải về hoặc gửi cho bạn. Nhập biên bản để máy chấm từng nước của cả hai
+          bên và rút ra bài học cho từng người.
+          {mine.length > 0 && ` Bạn đang có ${mine.length} ván đã lưu.`}
+        </p>
+      </div>
+      <a className="btn" href={href(`${kit.base}/phong/phan-tich`)}>
+        <ChartLineUp size={16} weight="bold" aria-hidden="true" />
+        {mine.length ? 'Xem và phân tích' : 'Nhập biên bản'}
+      </a>
     </div>
   );
 }
@@ -284,6 +310,17 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.status, room?.game]);
+
+  // biên bản của ván vừa xong: tự lưu vào "Ván đã chơi" (chỉ người chơi, không lưu cho người xem)
+  const over = room?.status === 'over' && sameVariant;
+  const sheet: SavedGame | null = useMemo(
+    () => (over && room && line.sans.length ? roomGame(kit, room, you, line, roomLink(kit.base, room.code)) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [over, room?.game, room?.moves.length, room?.result, line.sans.length, you],
+  );
+  useEffect(() => {
+    if (sheet && you !== null) rememberGame(sheet);
+  }, [sheet, you]);
 
   // ← → xem lại các nước
   useEffect(() => {
@@ -461,6 +498,17 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
           <div className="coach-card">
             <h4>📜 Biên bản ván đấu</h4>
             <kit.MoveList sans={line.sans} current={shown - 1} onSelect={(i) => setViewPly(i + 1 >= ply ? null : i + 1)} />
+            {sheet ? (
+              <SheetActions kit={kit} sheet={sheet} onToast={setToast} />
+            ) : (
+              playing &&
+              you !== null &&
+              ply > 0 && (
+                <p className="small muted" style={{ margin: '8px 0 0' }}>
+                  Khi ván kết thúc, bạn có thể tải biên bản và phân tích ván ngay tại đây.
+                </p>
+              )
+            )}
             {viewing && (
               <div className="banner-review" style={{ marginTop: 8 }}>
                 <span>👀 Đang xem lại nước {shown}</span>
@@ -484,7 +532,7 @@ function RoomScreen({ kit, code }: { kit: OnlineKit; code: string }) {
       </div>
 
       {resultOpen && room.status === 'over' && (
-        <ResultDialog kit={kit} room={room} you={you} onClose={() => setResultOpen(false)} onRematch={() => send({ t: 'rematch' })} />
+        <ResultDialog kit={kit} room={room} you={you} sheet={sheet} onClose={() => setResultOpen(false)} onRematch={() => send({ t: 'rematch' })} />
       )}
     </div>
   );
@@ -503,17 +551,15 @@ type Outcome = 'win' | 'loss' | 'draw' | 'watch';
 
 function resultInfo(room: PublicRoom, you: Side | null, kit: OnlineKit): { outcome: Outcome; icon: string; title: string; detail: string } {
   const winner = winnerOf(room);
-  const reason = room.reason ? kit.reasons[room.reason] : '';
-  if (winner === null) return { outcome: 'draw', icon: '🤝', title: 'Hòa', detail: cap(reason) };
-  const loser = (winner ^ 1) as Side;
   // xin thua, hết giờ, chiếu dai: nói rõ bên nào
-  const detail = room.reason === 'resign' || room.reason === 'timeout' || room.reason === 'perpetual' ? `${kit.sideNames[loser]} ${reason}` : cap(reason);
+  const detail = endDetail(room, kit);
+  if (winner === null) return { outcome: 'draw', icon: '🤝', title: 'Hòa', detail };
+  const loser = (winner ^ 1) as Side;
   if (you === winner) return { outcome: 'win', icon: '🏆', title: 'Bạn thắng!', detail };
   if (you === loser) return { outcome: 'loss', icon: '😔', title: 'Bạn thua', detail };
   return { outcome: 'watch', icon: '🏁', title: `${kit.sideNames[winner]} thắng (${room.seats[winner]?.name ?? ''})`, detail };
 }
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function rematchLabel(room: PublicRoom, you: Side): string {
   if (room.rematch[you]) return 'Đang chờ đối thủ…';
@@ -537,7 +583,21 @@ function rematchNote(room: PublicRoom, you: Side | null): string | null {
  * Hộp thoại kết quả ván đấu: hiện khi ván vừa kết thúc; đóng bằng ✕, chạm vùng tối hoặc Esc rồi mở lại bằng nút "Kết quả".
  * Gắn thẳng vào body (như BoardSheet) để hiệu ứng hiện trang của khung ứng dụng không làm lệch vị trí cố định.
  */
-function ResultDialog({ kit, room, you, onClose, onRematch }: { kit: OnlineKit; room: PublicRoom; you: Side | null; onClose: () => void; onRematch: () => void }) {
+function ResultDialog({
+  kit,
+  room,
+  you,
+  sheet,
+  onClose,
+  onRematch,
+}: {
+  kit: OnlineKit;
+  room: PublicRoom;
+  you: Side | null;
+  sheet: SavedGame | null;
+  onClose: () => void;
+  onRematch: () => void;
+}) {
   const root = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
@@ -652,6 +712,12 @@ function ResultDialog({ kit, room, you, onClose, onRematch }: { kit: OnlineKit; 
               ♻️ {rematchLabel(room, you)}
             </button>
           )}
+          {sheet && (
+            <button className="btn" onClick={() => openAnalysis(sheet)}>
+              <ChartLineUp size={16} weight="bold" aria-hidden="true" />
+              Phân tích ván
+            </button>
+          )}
           <button className="btn" onClick={onClose}>
             🔍 Xem lại ván
           </button>
@@ -662,6 +728,34 @@ function ResultDialog({ kit, room, you, onClose, onRematch }: { kit: OnlineKit; 
       </div>
     </div>,
     document.body,
+  );
+}
+
+/** Tải, chép biên bản (PGN) và mở trang phân tích cho ván vừa kết thúc */
+function SheetActions({ kit, sheet, onToast }: { kit: OnlineKit; sheet: SavedGame; onToast: (t: string) => void }) {
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(sheet.pgn);
+      onToast('Đã chép biên bản. Dán vào tin nhắn để gửi cho bạn, hoặc dán vào trang phân tích.');
+    } catch {
+      onToast('Trình duyệt chặn chép tự động. Hãy dùng nút “Tải biên bản”.');
+    }
+  };
+  return (
+    <div className="sheet-actions">
+      <button className="btn small primary" onClick={() => openAnalysis(sheet)}>
+        <ChartLineUp size={14} weight="bold" aria-hidden="true" />
+        Phân tích ván
+      </button>
+      <button className="btn small" onClick={() => downloadText(sheet.pgn, sheetFileName(kit.variant, sheet.players, new Date(sheet.savedAt)))}>
+        <DownloadSimple size={14} weight="bold" aria-hidden="true" />
+        Tải biên bản
+      </button>
+      <button className="btn small" onClick={copy}>
+        <ClipboardText size={14} weight="bold" aria-hidden="true" />
+        Chép
+      </button>
+    </div>
   );
 }
 
