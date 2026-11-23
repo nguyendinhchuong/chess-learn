@@ -4,6 +4,7 @@
 import { DragEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowCounterClockwise,
+  ArrowLeft,
   CaretLeft,
   CaretRight,
   ChartLineUp,
@@ -20,7 +21,7 @@ import { CLASS_INFO, type MoveClass } from '../engine/coach';
 import type { AnalysisResult } from '../engine/protocol';
 import type { Side } from '../online/protocol';
 import type { AnalysisKit } from './kit';
-import { analysisKey, downloadText, endDetail, loadAnalysis, openAnalysis, rememberGame, saveAnalysis, slim, useCurrentGame, useGameHistory, type SavedGame } from './history';
+import { analysisKey, downloadText, endDetail, loadAnalysis, openAnalysis, rememberGame, roomOf, saveAnalysis, slim, useCurrentGame, useGameHistory, type SavedGame } from './history';
 import { hashText, isSheetError, parseSheet, sheetFileName, type ParsedSheet } from './sheet';
 import { assignPhases, buildReport, moveNo, PHASE_NAME, PHASES, type GameReport, type SideReport } from './report';
 import type { Finding, MoveInsight, ReplayedGame, Review } from './types';
@@ -425,6 +426,7 @@ function GameReview({ kit, game, parsed, line, onImport }: { kit: AnalysisKit; g
   const resultText = parsed.result === '1-0' ? `${names[0]} thắng` : parsed.result === '0-1' ? `${names[1]} thắng` : parsed.result === '1/2-1/2' ? 'Hòa' : 'Chưa kết thúc';
   const date = parsed.headers.Date && /^\d{4}\.\d{2}\.\d{2}$/.test(parsed.headers.Date) ? parsed.headers.Date.split('.').reverse().join('/') : null;
   const fileName = sheetFileName(online.variant, players, new Date(game.savedAt));
+  const room = roomOf(game);
 
   const strip = (s: Side) => {
     const sr = report?.sides[s];
@@ -452,7 +454,13 @@ function GameReview({ kit, game, parsed, line, onImport }: { kit: AnalysisKit; g
   return (
     <div className="an-page">
       <div className="breadcrumb">
-        <a href={href(`${online.base}/phong`)}>Chơi với bạn</a> › Phân tích ván
+        <a href={href(`${online.base}/phong`)}>Chơi với bạn</a> ›{' '}
+        {room && (
+          <>
+            <a href={href(`${online.base}/phong/${room}`)}>Phòng {room}</a> ›{' '}
+          </>
+        )}
+        Phân tích ván
       </div>
       <div className="an-head">
         <div>
@@ -468,6 +476,12 @@ function GameReview({ kit, game, parsed, line, onImport }: { kit: AnalysisKit; g
           </p>
         </div>
         <div className="btn-row">
+          {room && (
+            <a className="btn small primary" href={href(`${online.base}/phong/${room}`)}>
+              <ArrowLeft size={16} weight="bold" aria-hidden="true" />
+              Quay lại phòng
+            </a>
+          )}
           <button className="btn small" onClick={() => downloadText(game.pgn, fileName)}>
             <DownloadSimple size={16} weight="bold" aria-hidden="true" />
             Tải biên bản

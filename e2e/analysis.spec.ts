@@ -80,6 +80,15 @@ test('cờ vua: chơi xong một ván có đồng hồ, tải biên bản PGN, m
   await expect(friend.page.locator('.coach-panel')).toContainText('Sai lầm');
   await expectNoHorizontalOverflow(friend.page);
 
+  // phân tích xong quay lại phòng để chơi tiếp: vẫn ngồi đúng ghế và mời được ván mới
+  const code = new URL(link).hash.split('/').pop()!;
+  await expect(friend.page.locator('.breadcrumb')).toContainText(`Phòng ${code}`);
+  await friend.page.getByRole('link', { name: 'Quay lại phòng' }).click();
+  await expect(friend.page).toHaveURL(new RegExp(`#/phong/${code}$`));
+  await expect(friend.page.getByRole('dialog')).toHaveCount(0);
+  await friend.page.getByRole('button', { name: /Ván mới \(đổi màu\)/ }).click();
+  await expect(page.getByText('Đối thủ muốn chơi ván mới (đổi màu).')).toBeVisible();
+
   // ván đã lưu vào "Ván đã chơi" của cả hai người
   await page.goto('/#/phong');
   await expect(page.locator('.online-invite', { hasText: 'Phân tích ván đã chơi' })).toContainText('1 ván đã lưu');
