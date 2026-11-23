@@ -18,6 +18,8 @@ export interface SavedGame {
   plies: number;
   savedAt: number;
   source: 'online' | 'import';
+  /** Mã phòng của ván chơi với bạn (ván lưu trước khi có trường này: lấy từ `id`) */
+  room?: string;
 }
 
 const HISTORY_KEY = 'game-history';
@@ -39,6 +41,12 @@ export function rememberGame(g: SavedGame) {
 
 export function useCurrentGame(v: Variant) {
   return useStored<SavedGame | null>(currentKey(v), null);
+}
+
+/** Mã phòng đã chơi ván này (null với ván nhập từ biên bản) */
+export function roomOf(g: SavedGame): string | null {
+  if (g.source !== 'online') return null;
+  return g.room ?? /^(.+)-\d+$/.exec(g.id)?.[1] ?? null;
 }
 
 /** Mở trang phân tích cho một ván */
@@ -86,6 +94,7 @@ export function roomGame(kit: OnlineKit, room: PublicRoom, you: Side | null, lin
     plies: ucis.length,
     savedAt: Date.now(),
     source: 'online',
+    room: room.code,
   };
 }
 
