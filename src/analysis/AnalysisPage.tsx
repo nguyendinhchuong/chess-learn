@@ -44,6 +44,8 @@ export function GameAnalysis({ kit }: { kit: AnalysisKit }) {
 // =====================================================================================
 // Nhập biên bản
 // =====================================================================================
+const SOURCE_LABEL: Record<SavedGame['source'], string> = { online: 'Chơi với bạn', local: 'Đấu hai người', import: 'Đã nhập' };
+
 const PARSE_ERROR: Record<string, string> = {
   empty: 'Chưa có nội dung. Hãy dán biên bản PGN hoặc chọn tệp .pgn.',
   'no-moves': 'Biên bản không có nước đi nào.',
@@ -186,7 +188,7 @@ function ImportScreen({ kit, onLoaded, onBack }: { kit: AnalysisKit; onLoaded: (
                       <b>{g.players[1]}</b>
                     </span>
                     <span className="small muted">
-                      {g.source === 'online' ? 'Chơi với bạn' : 'Đã nhập'} · {Math.ceil(g.plies / 2)} nước · {new Date(g.savedAt).toLocaleDateString('vi-VN')}
+                      {SOURCE_LABEL[g.source]} · {Math.ceil(g.plies / 2)} nước · {new Date(g.savedAt).toLocaleDateString('vi-VN')}
                       {g.you !== null && ` · bạn cầm ${online.sideNames[g.you]}`}
                     </span>
                   </button>

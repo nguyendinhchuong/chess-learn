@@ -24,6 +24,15 @@ export const CHESS_KIT: OnlineKit = {
     }
     return { fens, sans };
   },
+  status(moves) {
+    const pos = new Position(START_FEN);
+    for (const u of moves) {
+      const m = pos.moveFromUci(u);
+      if (!m) break;
+      pos.make(m);
+    }
+    return pos.status();
+  },
   Board: ({ fen, bottom, movable, onMove, lastMove }) => (
     <Board fen={fen} orientation={bottom === 0 ? 'white' : 'black'} movable={movable === null ? 'none' : movable === 0 ? 'white' : 'black'} onMove={onMove} lastMove={lastMove} />
   ),

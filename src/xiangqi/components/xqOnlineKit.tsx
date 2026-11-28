@@ -26,6 +26,15 @@ export const XQ_KIT: OnlineKit = {
     }
     return { fens, sans };
   },
+  status(moves) {
+    const pos = new Position(START_FEN);
+    for (const u of moves) {
+      const m = pos.moveFromUci(u);
+      if (!m) break;
+      pos.make(m);
+    }
+    return pos.status();
+  },
   Board: ({ fen, bottom, movable, onMove, lastMove }) => (
     <XqBoard fen={fen} orientation={bottom === 0 ? 'red' : 'black'} movable={movable === null ? 'none' : movable === 0 ? 'red' : 'black'} onMove={onMove} lastMove={lastMove} />
   ),

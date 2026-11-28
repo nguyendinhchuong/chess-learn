@@ -206,7 +206,7 @@ function useNow(interval: number | null) {
   return now;
 }
 
-function formatClock(ms: number): string {
+export function formatClock(ms: number): string {
   if (ms < 10_000) return (Math.floor(ms / 100) / 10).toFixed(1);
   const total = Math.ceil(ms / 1000);
   const h = Math.floor(total / 3600);
@@ -216,7 +216,7 @@ function formatClock(ms: number): string {
 }
 
 /** Đồng hồ một bên; tự đếm lùi (chỉ phần này vẽ lại 10 lần/giây, không phải cả bàn cờ) */
-function Clock({ ms, running, playing, receivedAt, label }: { ms: number; running: boolean; playing: boolean; receivedAt: number; label: string }) {
+export function Clock({ ms, running, playing, receivedAt, label }: { ms: number; running: boolean; playing: boolean; receivedAt: number; label: string }) {
   const now = useNow(running ? 100 : null);
   const left = Math.max(0, ms - (running ? Math.max(0, now - receivedAt) : 0));
   return (
@@ -580,33 +580,18 @@ function rematchNote(room: PublicRoom, you: Side | null): string | null {
 }
 
 /**
- * Hộp thoại kết quả ván đấu: hiện khi ván vừa kết thúc; đóng bằng ✕, chạm vùng tối hoặc Esc rồi mở lại bằng nút "Kết quả".
- * Gắn thẳng vào body (như BoardSheet) để hiệu ứng hiện trang của khung ứng dụng không làm lệch vị trí cố định.
+ * Khóa trang phía sau một hộp thoại gắn vào body: trang đứng yên, không nhận chạm hay tiêu điểm (Tab không lọt ra sau),
+ * Esc để đóng; đóng hộp thoại thì trả tiêu điểm về chỗ cũ (vd nút "Kết quả").
+ * Gắn `root` cho lớp phủ và `panel` cho khung hộp thoại (nhận tiêu điểm khi mở).
  */
-function ResultDialog({
-  kit,
-  room,
-  you,
-  sheet,
-  onClose,
-  onRematch,
-}: {
-  kit: OnlineKit;
-  room: PublicRoom;
-  you: Side | null;
-  sheet: SavedGame | null;
-  onClose: () => void;
-  onRematch: () => void;
-}) {
+export function useModalLock(onClose: () => void) {
   const root = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
   close.current = onClose;
 
   useEffect(() => {
-    // đóng hộp thoại thì trả tiêu điểm về chỗ cũ (vd nút "Kết quả")
     const back = document.activeElement as HTMLElement | null;
-    // trang phía sau đứng yên, không nhận chạm hay tiêu điểm (Tab không lọt ra sau hộp thoại)
     document.documentElement.classList.add('sheet-lock');
     const inerted: HTMLElement[] = [];
     for (const s of Array.from(document.body.children)) {
@@ -625,6 +610,30 @@ function ResultDialog({
       back?.focus({ preventScroll: true });
     };
   }, []);
+
+  return { root, panel };
+}
+
+/**
+ * Hộp thoại kết quả ván đấu: hiện khi ván vừa kết thúc; đóng bằng ✕, chạm vùng tối hoặc Esc rồi mở lại bằng nút "Kết quả".
+ * Gắn thẳng vào body (như BoardSheet) để hiệu ứng hiện trang của khung ứng dụng không làm lệch vị trí cố định.
+ */
+function ResultDialog({
+  kit,
+  room,
+  you,
+  sheet,
+  onClose,
+  onRematch,
+}: {
+  kit: OnlineKit;
+  room: PublicRoom;
+  you: Side | null;
+  sheet: SavedGame | null;
+  onClose: () => void;
+  onRematch: () => void;
+}) {
+  const { root, panel } = useModalLock(onClose);
 
   const info = resultInfo(room, you, kit);
   const winner = winnerOf(room);
@@ -732,7 +741,7 @@ function ResultDialog({
 }
 
 /** Tải, chép biên bản (PGN) và mở trang phân tích cho ván vừa kết thúc */
-function SheetActions({ kit, sheet, onToast }: { kit: OnlineKit; sheet: SavedGame; onToast: (t: string) => void }) {
+export function SheetActions({ kit, sheet, onToast }: { kit: OnlineKit; sheet: SavedGame; onToast: (t: string) => void }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(sheet.pgn);

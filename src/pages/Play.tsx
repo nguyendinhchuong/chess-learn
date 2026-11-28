@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { CaretLeft, CaretRight, Play as PlayIcon } from '@phosphor-icons/react';
 import { Board, BoardArrow } from '../components/Board';
 import { BotStep, ClassSymbol, EvalBar, MoveList, MoveMark, RichText, San, StartBar, WinBar } from '../components/common';
@@ -15,6 +15,8 @@ import { PIECE_SVG } from '../assets/pieces';
 import { useStored, BotStats } from '../lib/storage';
 import { playMoveSound, sounds } from '../lib/sound';
 import { navigate } from '../lib/router';
+import { CHESS_KIT } from '../online/chessKit';
+import { LocalGame, LocalSetupScreen, OpponentSwitch, type LocalStart, type Opponent } from '../online/LocalPlay';
 
 interface CoachSettings {
   evalBar: boolean;
@@ -63,18 +65,50 @@ function rebuild(startFen: string, moves: string[]) {
 
 export function Play({ query }: { query: URLSearchParams }) {
   const [setup, setSetup] = useState<GameSetup | null>(null);
+  const [local, setLocal] = useState<LocalStart | null>(null);
   const presetFen = query.get('fen') ?? undefined;
   const presetMoves = (query.get('moves') ?? '').split(/[ ,]+/).filter(Boolean);
   const presetSide = query.get('side') as 'w' | 'b' | null;
-  useEffect(() => setSetup(null), [query.toString()]);
-  if (!setup) return <SetupScreen presetFen={presetFen} presetMoves={presetMoves} presetSide={presetSide ?? undefined} onStart={setSetup} />;
-  return <GameScreen key={setup.id} setup={setup} onNew={() => setSetup(null)} onRestart={(s) => setSetup({ ...s, id: Date.now() })} />;
+  const hasPreset = !!presetFen || presetMoves.length > 0;
+  // cách chơi lần trước; đến từ một thế cờ (bài học, khai cuộc) thì mặc định đấu với máy từ thế cờ đó
+  const [lastOpponent, setLastOpponent] = useStored<Opponent>('play-opponent', 'bot');
+  const [opponent, setOpponent] = useState<Opponent>(hasPreset ? 'bot' : lastOpponent);
+  const pickOpponent = (o: Opponent) => {
+    setOpponent(o);
+    setLastOpponent(o);
+  };
+  useEffect(() => {
+    setSetup(null);
+    setLocal(null);
+    if (hasPreset) setOpponent('bot');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.toString()]);
+
+  if (local) return <LocalGame key={local.id} kit={CHESS_KIT} store="" start={local} onNew={() => setLocal(null)} onRestart={setLocal} />;
+  if (setup) return <GameScreen key={setup.id} setup={setup} onNew={() => setSetup(null)} onRestart={(s) => setSetup({ ...s, id: Date.now() })} />;
+  const switcher = <OpponentSwitch value={opponent} onChange={pickOpponent} />;
+  if (opponent === 'local')
+    return <LocalSetupScreen kit={CHESS_KIT} store="" switcher={switcher} note={hasPreset ? 'Ván hai người bắt đầu từ thế cờ ban đầu (không dùng thế cờ đã chọn).' : undefined} onStart={setLocal} />;
+  return <SetupScreen presetFen={presetFen} presetMoves={presetMoves} presetSide={presetSide ?? undefined} switcher={switcher} onStart={setSetup} />;
 }
 
 // =====================================================================================
 // Màn hình thiết lập
 // =====================================================================================
-function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFen?: string; presetMoves: string[]; presetSide?: 'w' | 'b'; onStart: (s: GameSetup) => void }) {
+function SetupScreen({
+  presetFen,
+  presetMoves,
+  presetSide,
+  switcher,
+  onStart,
+}: {
+  presetFen?: string;
+  presetMoves: string[];
+  presetSide?: 'w' | 'b';
+  /** Công tắc chọn cách chơi (đấu với máy / hai người) */
+  switcher: ReactNode;
+  onStart: (s: GameSetup) => void;
+}) {
   const [level, setLevel] = useStored<number>('last-level', 2);
   const [color, setColor] = useStored<'w' | 'b' | 'random'>('last-color', 'w');
   const [mode, setMode] = useStored<'coach' | 'match' | 'custom'>('last-mode', 'coach');
@@ -118,6 +152,8 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
         <h1>🎯 Luyện tập với máy</h1>
         <p>Chọn đối thủ phù hợp với trình độ. Ở chế độ Huấn luyện, Thầy Cú 🦉 sẽ chấm từng nước đi của bạn, chỉ ra nước mạnh – nước yếu, cảnh báo nguy hiểm và dự đoán đối thủ sẽ đi gì tiếp theo.</p>
       </div>
+
+      {switcher}
 
       {saved && !saved.over && saved.moves.length > saved.setup.preMoves.length && !hasPreset && (
         <div className="callout info" style={{ marginBottom: 18, alignItems: 'center' }}>
