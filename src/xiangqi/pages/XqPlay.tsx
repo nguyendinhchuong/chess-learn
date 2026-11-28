@@ -1,5 +1,5 @@
 // Luyện tập cờ tướng với máy: sáu cấp độ, huấn luyện viên chấm từng nước, gợi ý, cảnh báo đe dọa, dự đoán nước đi.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { CaretLeft, CaretRight, Play } from '@phosphor-icons/react';
 import { XqBoard, XqPieceFace, BoardArrow } from '../components/XqBoard';
 import { XqMoveList, XqSan, playXqMoveSound } from '../components/xqCommon';
@@ -16,6 +16,8 @@ import { isBookMove, openingNameAt, pickBookMove } from '../engine/book';
 import { useStored, BotStats } from '../../lib/storage';
 import { sounds } from '../../lib/sound';
 import { navigate } from '../../lib/router';
+import { XQ_KIT } from '../components/xqOnlineKit';
+import { LocalGame, LocalSetupScreen, OpponentSwitch, type LocalStart, type Opponent } from '../../online/LocalPlay';
 import { XQ } from './XqLessons';
 
 function KingIcon({ red }: { red: boolean }) {
@@ -73,18 +75,50 @@ function rebuild(startFen: string, moves: string[]) {
 
 export function XqPlay({ query }: { query: URLSearchParams }) {
   const [setup, setSetup] = useState<GameSetup | null>(null);
+  const [local, setLocal] = useState<LocalStart | null>(null);
   const presetFen = query.get('fen') ?? undefined;
   const presetMoves = (query.get('moves') ?? '').split(/[ ,]+/).filter(Boolean);
   const presetSide = query.get('side') as 'w' | 'b' | null;
-  useEffect(() => setSetup(null), [query.toString()]);
-  if (!setup) return <SetupScreen presetFen={presetFen} presetMoves={presetMoves} presetSide={presetSide ?? undefined} onStart={setSetup} />;
-  return <GameScreen key={setup.id} setup={setup} onNew={() => setSetup(null)} onRestart={(s) => setSetup({ ...s, id: Date.now() })} />;
+  const hasPreset = !!presetFen || presetMoves.length > 0;
+  // cách chơi lần trước; đến từ một thế cờ (bài học, khai cuộc) thì mặc định đấu với máy từ thế cờ đó
+  const [lastOpponent, setLastOpponent] = useStored<Opponent>('xq-play-opponent', 'bot');
+  const [opponent, setOpponent] = useState<Opponent>(hasPreset ? 'bot' : lastOpponent);
+  const pickOpponent = (o: Opponent) => {
+    setOpponent(o);
+    setLastOpponent(o);
+  };
+  useEffect(() => {
+    setSetup(null);
+    setLocal(null);
+    if (hasPreset) setOpponent('bot');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.toString()]);
+
+  if (local) return <LocalGame key={local.id} kit={XQ_KIT} store="xq-" start={local} onNew={() => setLocal(null)} onRestart={setLocal} />;
+  if (setup) return <GameScreen key={setup.id} setup={setup} onNew={() => setSetup(null)} onRestart={(s) => setSetup({ ...s, id: Date.now() })} />;
+  const switcher = <OpponentSwitch value={opponent} onChange={pickOpponent} />;
+  if (opponent === 'local')
+    return <LocalSetupScreen kit={XQ_KIT} store="xq-" switcher={switcher} note={hasPreset ? 'Ván hai người bắt đầu từ thế cờ ban đầu (không dùng thế cờ đã chọn).' : undefined} onStart={setLocal} />;
+  return <SetupScreen presetFen={presetFen} presetMoves={presetMoves} presetSide={presetSide ?? undefined} switcher={switcher} onStart={setSetup} />;
 }
 
 // =====================================================================================
 // Màn hình thiết lập
 // =====================================================================================
-function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFen?: string; presetMoves: string[]; presetSide?: 'w' | 'b'; onStart: (s: GameSetup) => void }) {
+function SetupScreen({
+  presetFen,
+  presetMoves,
+  presetSide,
+  switcher,
+  onStart,
+}: {
+  presetFen?: string;
+  presetMoves: string[];
+  presetSide?: 'w' | 'b';
+  /** Công tắc chọn cách chơi (đấu với máy / hai người) */
+  switcher: ReactNode;
+  onStart: (s: GameSetup) => void;
+}) {
   const [level, setLevel] = useStored<number>('xq-last-level', 2);
   const [color, setColor] = useStored<'w' | 'b' | 'random'>('xq-last-color', 'w');
   const [mode, setMode] = useStored<'coach' | 'match' | 'custom'>('xq-last-mode', 'coach');
@@ -128,6 +162,8 @@ function SetupScreen({ presetFen, presetMoves, presetSide, onStart }: { presetFe
         <h1>🎯 Luyện tập cờ tướng với máy</h1>
         <p>Chọn đối thủ phù hợp với trình độ. Ở chế độ Huấn luyện, Thầy Cú 🦉 sẽ chấm từng nước đi cờ tướng của bạn, chỉ ra nước mạnh – nước yếu, cảnh báo nguy hiểm và dự đoán đối thủ sẽ đi gì tiếp theo.</p>
       </div>
+
+      {switcher}
 
       {saved && !saved.over && saved.moves.length > saved.setup.preMoves.length && !hasPreset && (
         <div className="callout info" style={{ marginBottom: 18, alignItems: 'center' }}>

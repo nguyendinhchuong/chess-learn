@@ -159,3 +159,32 @@ test('luyện tập: đi một nước, máy đáp lại, thầy nhận xét', a
   expect(errors, errors.join('\n')).toEqual([]);
   await expectNoHorizontalOverflow(page);
 });
+
+test('luyện tập – đấu hai người: bàn cờ xoay theo lượt, chiếu hết rồi phân tích ván', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/#/luyen-tap');
+  await page.getByRole('button', { name: 'Đấu hai người' }).click();
+  await page.getByPlaceholder('Người chơi 1').fill('An');
+  await page.getByPlaceholder('Người chơi 2').fill('Bình');
+  await page.getByRole('button', { name: /Bắt đầu ván hai người/ }).click();
+  await expect(page.locator('.play .board')).toBeVisible();
+  // ô đầu tiên của bàn cờ: a8 khi Trắng ở dưới, h1 khi bàn đã xoay cho Đen
+  const firstSquare = () => page.locator('.play .board .sq').first().getAttribute('data-sq');
+  // thế chiếu hết nhanh nhất: 1.f3 e5 2.g4 Qh4#
+  const line = ['f2f3', 'e7e5', 'g2g4', 'd8h4'];
+  for (let i = 0; i < line.length; i++) {
+    await expect.poll(firstSquare).toBe(i % 2 === 0 ? 'a8' : 'h1');
+    await clickSquare(page, line[i].slice(0, 2));
+    await clickSquare(page, line[i].slice(2, 4));
+    await expect(page.locator('.movelist .mv:not(.empty)')).toHaveCount(i + 1);
+  }
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Bình thắng!');
+  await expect(dialog).toContainText('Chiếu hết');
+  // ván xong được lưu vào "Ván đã chơi" và mở được ở trang phân tích
+  await dialog.getByRole('button', { name: 'Phân tích ván' }).click();
+  await expect(page).toHaveURL(/#\/phong\/phan-tich$/);
+  await expect(page.locator('main h1')).toContainText('An');
+  await expect(page.locator('main h1')).toContainText('Bình');
+  expect(errors, errors.join('\n')).toEqual([]);
+});

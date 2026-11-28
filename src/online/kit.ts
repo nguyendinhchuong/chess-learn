@@ -1,7 +1,7 @@
 // Phần riêng của từng môn cờ cho trang phòng chơi trực tuyến (bàn cờ, ký hiệu nước đi, âm thanh, cách gọi tên).
 // Cờ vua: src/online/chessKit.tsx; cờ tướng: src/xiangqi/components/xqOnlineKit.tsx (tải cùng phần cờ tướng).
 import type { ComponentType } from 'react';
-import type { EndReason, Side, Variant } from './protocol';
+import type { EndReason, Result, Side, Variant } from './protocol';
 
 export interface OnlineBoardProps {
   fen: string;
@@ -29,6 +29,8 @@ export interface OnlineKit {
   SideIcon: ComponentType<{ side: Side }>;
   /** Các thế cờ và ký hiệu nước đi của chuỗi nước (dừng ở nước không hợp lệ đầu tiên) */
   replay(moves: string[]): { fens: string[]; sans: string[] };
+  /** Ván đã kết thúc trên bàn cờ chưa (chiếu hết, hết nước, hòa theo luật…) sau chuỗi nước hợp lệ */
+  status(moves: string[]): { over: boolean; result?: Result; reason?: EndReason };
   Board: ComponentType<OnlineBoardProps>;
   MoveList: ComponentType<OnlineMoveListProps>;
   moveSound(fenBefore: string, uci: string, san: string): void;

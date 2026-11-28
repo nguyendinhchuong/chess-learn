@@ -17,7 +17,8 @@ export interface SavedGame {
   you: Side | null;
   plies: number;
   savedAt: number;
-  source: 'online' | 'import';
+  /** online: phòng "Chơi với bạn"; local: hai người chơi trên một máy (trang Luyện tập); import: nhập biên bản */
+  source: 'online' | 'local' | 'import';
   /** Mã phòng của ván chơi với bạn (ván lưu trước khi có trường này: lấy từ `id`) */
   room?: string;
 }

@@ -193,3 +193,31 @@ test('cờ tướng – luyện tập: đi Pháo đầu, máy đáp lại, thầ
   expect(errors, errors.join('\n')).toEqual([]);
   await expectNoHorizontalOverflow(page);
 });
+
+test('cờ tướng – đấu hai người: bàn xoay theo lượt, tải lại trang chơi tiếp, đi lại', async ({ page }) => {
+  const errors = trackErrors(page);
+  const moves = page.locator('.movelist .mv:not(.empty)');
+  const bottomStrip = page.locator('.play .online-strip').last();
+  await page.goto('/#/co-tuong/luyen-tap');
+  await page.getByRole('button', { name: 'Đấu hai người' }).click();
+  await page.getByRole('button', { name: /Bắt đầu ván hai người/ }).click();
+  await expect(page.locator('.play .xq-board')).toBeVisible();
+  await expect(bottomStrip).toContainText('Cầm quân Đỏ');
+  await playMove(page, '.play', 'h2e2');
+  await expect(moves).toHaveCount(1);
+  // bàn cờ xoay về phía người cầm quân Đen
+  await expect(bottomStrip).toContainText('Cầm quân Đen');
+  await playMove(page, '.play', 'h9g7');
+  await expect(moves).toHaveCount(2);
+  await expect(bottomStrip).toContainText('Cầm quân Đỏ');
+  // tải lại trang: trang Luyện tập nhớ cách chơi và mời chơi tiếp ván dở
+  await page.reload();
+  await page.getByRole('button', { name: 'Tiếp tục' }).click();
+  await expect(moves).toHaveCount(2);
+  await page.getByRole('button', { name: /Đi lại/ }).click();
+  await expect(moves).toHaveCount(1);
+  await expect(bottomStrip).toContainText('Cầm quân Đen');
+  await scrollToBottom(page);
+  expect(errors, errors.join('\n')).toEqual([]);
+  await expectNoHorizontalOverflow(page);
+});

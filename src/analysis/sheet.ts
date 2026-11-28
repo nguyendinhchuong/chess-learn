@@ -10,6 +10,8 @@ export type SheetResult = Result | '*';
 
 export interface SheetInput {
   variant: Variant;
+  /** Tên giải (thẻ Event); mặc định là "Chơi … với bạn" */
+  event?: string;
   players: [string, string];
   result: Result | null;
   reason: EndReason | null;
@@ -69,7 +71,7 @@ const iccs = (u: string) => `${u.slice(0, 2)}-${u.slice(2, 4)}`.toUpperCase();
 export function formatSheet(g: SheetInput): string {
   const result: SheetResult = g.result ?? '*';
   const tags: [string, string][] = [
-    ['Event', g.variant === 'chess' ? 'Kỳ Đạo – Chơi cờ vua với bạn' : 'Kỳ Đạo – Chơi cờ tướng với bạn'],
+    ['Event', g.event ?? (g.variant === 'chess' ? 'Kỳ Đạo – Chơi cờ vua với bạn' : 'Kỳ Đạo – Chơi cờ tướng với bạn')],
     ['Site', g.site ?? 'Kỳ Đạo'],
     ['Date', pgnDate(g.date)],
     ['Round', String(g.round ?? 1)],
