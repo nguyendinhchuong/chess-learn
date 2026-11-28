@@ -116,6 +116,14 @@ Nếu trang web và máy chủ phòng cùng một tên miền (ví dụ đặt W
 
 Các cấp độ máy có Elo ước tính; cấp cao nhất là sức mạnh tối đa của bộ máy viết bằng JavaScript trong ~4 giây/nước, chưa phải trình độ đại kiện tướng thật. Gợi ý và phân tích thì dùng Stockfish 18 (độ sâu khoảng 18–20 trong 1,5 giây), mạnh hơn nhiều so với đại kiện tướng.
 
-Stockfish.js © Chess.com, LLC và các tác giả Stockfish, giấy phép GPLv3 (`public/stockfish/Copying.txt`); tệp lấy nguyên từ gói npm `stockfish@18.0.8`.
+## Giấy phép
 
-Hình quân cờ: bộ “cburnett” của Colin M.L. Burnett (GPLv2+).
+Copyright © 2026 các tác giả Kỳ Đạo.
+
+Kỳ Đạo là phần mềm tự do, phát hành theo **Giấy phép Công cộng GNU phiên bản 3 hoặc mới hơn** (GPL-3.0-or-later); toàn văn giấy phép nằm trong tệp [`LICENSE`](LICENSE). Bạn được tự do dùng, nghiên cứu, sửa đổi và phát hành lại; khi phát hành lại (nguyên bản hay bản đã sửa) phải giữ cùng giấy phép và cung cấp mã nguồn tương ứng. Phần mềm được cung cấp nguyên trạng, không kèm bất kỳ bảo đảm nào.
+
+Các thành phần của bên thứ ba giữ giấy phép riêng của chúng:
+
+- **Stockfish.js** (`public/stockfish/`) © Chess.com, LLC và các tác giả Stockfish – GPLv3 (`public/stockfish/Copying.txt`). Tệp lấy nguyên, không sửa, từ gói npm `stockfish@18.0.8`; mã nguồn tương ứng: <https://github.com/nmrugg/stockfish.js/tree/v18.0.8> (bộ máy gốc: <https://github.com/official-stockfish/Stockfish>).
+- **Hình quân cờ vua “cburnett”** (`src/assets/pieces.ts`) © Colin M.L. Burnett – GPLv2 trở lên (dùng theo GPLv3 cùng project), lấy từ gói chessground.
+- **React, React DOM, Phosphor Icons** – MIT. **Phông chữ Manrope** (tải từ Google Fonts) – SIL Open Font License 1.1.
