@@ -23,6 +23,8 @@ export interface SheetInput {
   site?: string;
   /** Ván thứ mấy trong phòng */
   round?: number;
+  /** Thế cờ bắt đầu (FEN) khi ván không bắt đầu từ thế cờ ban đầu: ghi thành thẻ SetUp/FEN */
+  startFen?: string;
   /** Nước đi dạng tọa độ (UCI / ICCS chữ thường) */
   ucis: string[];
   /** Ký hiệu hiển thị: SAN (cờ vua) hoặc ký hiệu Việt Nam (cờ tướng) */
@@ -80,6 +82,7 @@ export function formatSheet(g: SheetInput): string {
     ['Result', result],
   ];
   if (g.variant === 'xiangqi') tags.push(...(Object.entries(XQ_HEADERS) as [string, string][]));
+  if (g.startFen) tags.push(['SetUp', '1'], ['FEN', g.startFen]);
   tags.push(['TimeControl', formatTimeControl(g.time)]);
   tags.push(['PlyCount', String(g.ucis.length)]);
   if (g.opening) tags.push(['Opening', g.opening]);
@@ -87,12 +90,17 @@ export function formatSheet(g: SheetInput): string {
   if (g.reason) tags.push(['EndReason', g.reason]);
 
   const clocks = g.clockLog && g.clockLog.length === g.ucis.length ? g.clockLog : null;
+  // số thứ tự nước theo thế cờ bắt đầu: bên đi trước (trường 2 của FEN) và số nước (trường 6)
+  const fen = g.startFen?.trim().split(/\s+/) ?? [];
+  const blackFirst = fen[1] === 'b';
+  const firstNo = Math.max(1, parseInt(fen[5] ?? '', 10) || 1);
   const parts: string[] = [];
   let afterComment = false;
   g.ucis.forEach((u, i) => {
-    const no = Math.floor(i / 2) + 1;
-    if (i % 2 === 0) parts.push(`${no}.`);
-    else if (afterComment) parts.push(`${no}...`);
+    const ply = i + (blackFirst ? 1 : 0);
+    const no = firstNo + Math.floor(ply / 2);
+    if (ply % 2 === 0) parts.push(`${no}.`);
+    else if (afterComment || i === 0) parts.push(`${no}...`);
     const notes: string[] = [];
     if (g.variant === 'chess') parts.push(g.sans[i] ?? u);
     else {

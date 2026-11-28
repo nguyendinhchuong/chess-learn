@@ -44,7 +44,7 @@ export function GameAnalysis({ kit }: { kit: AnalysisKit }) {
 // =====================================================================================
 // Nhập biên bản
 // =====================================================================================
-const SOURCE_LABEL: Record<SavedGame['source'], string> = { online: 'Chơi với bạn', local: 'Đấu hai người', import: 'Đã nhập' };
+const SOURCE_LABEL: Record<SavedGame['source'], string> = { online: 'Chơi với bạn', bot: 'Đấu với máy', local: 'Đấu hai người', import: 'Đã nhập' };
 
 const PARSE_ERROR: Record<string, string> = {
   empty: 'Chưa có nội dung. Hãy dán biên bản PGN hoặc chọn tệp .pgn.',

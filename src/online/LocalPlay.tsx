@@ -6,8 +6,7 @@ import { createPortal } from 'react-dom';
 import { ArrowsLeftRight, ChartLineUp, Play, X } from '@phosphor-icons/react';
 import { save, useStored } from '../lib/storage';
 import { sounds } from '../lib/sound';
-import { endDetail, openAnalysis, rememberGame, type SavedGame } from '../analysis/history';
-import { formatSheet } from '../analysis/sheet';
+import { endDetail, openAnalysis, practiceGame, rememberGame, type SavedGame } from '../analysis/history';
 import { Clock, formatClock, SheetActions, useModalLock } from './OnlinePages';
 import type { OnlineKit } from './kit';
 import { NAME_MAX, TIME_PRESETS, timeLabel, type EndReason, type Result, type Side, type TimeControl } from './protocol';
@@ -223,30 +222,7 @@ export function LocalSetupScreen({
 // Màn hình ván đấu
 // =====================================================================================
 function localSheet(kit: OnlineKit, setup: LocalSetup, moves: string[], sans: string[], end: LocalEnd, clockLog?: number[]): SavedGame {
-  const pgn = formatSheet({
-    variant: kit.variant,
-    event: `Kỳ Đạo – Hai người chơi ${kit.title} trên một máy`,
-    players: setup.names,
-    result: end.result,
-    reason: end.reason,
-    reasonText: endDetail(end, kit),
-    time: setup.time,
-    date: new Date(setup.startedAt),
-    ucis: moves,
-    sans,
-    clockLog,
-  });
-  return {
-    id: `local-${kit.variant}-${setup.startedAt}`,
-    variant: kit.variant,
-    pgn,
-    players: setup.names,
-    result: end.result,
-    you: null,
-    plies: moves.length,
-    savedAt: Date.now(),
-    source: 'local',
-  };
+  return practiceGame(kit, { source: 'local', startedAt: setup.startedAt, players: setup.names, you: null, end, ucis: moves, sans, time: setup.time, clockLog });
 }
 
 const winnerOf = (end: LocalEnd): Side | null => (end.result === '1-0' ? 0 : end.result === '0-1' ? 1 : null);
