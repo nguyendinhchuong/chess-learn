@@ -97,6 +97,19 @@ describe('biên bản cờ vua', () => {
     expect(CHESS_REVIEW.replay(q.tokens, q.startFen).ucis).toEqual(['e2e4', 'e8d7']);
   });
 
+  it('ván bắt đầu từ thế cờ có sẵn (Đen đi trước): ghi SetUp/FEN, đánh số nước theo FEN, đọc lại đúng', () => {
+    const fen = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 3 2';
+    const moves = ['g8f6', 'f3e5', 'c6e5'];
+    const replayed = CHESS_REVIEW.replay(moves, fen);
+    const pgn = formatSheet({ variant: 'chess', players: ['Người chơi', 'Gà Con (máy cấp 1)'], result: '0-1', reason: 'resign', time: null, date: DATE, startFen: fen, ucis: moves, sans: replayed.sans });
+    expect(pgn).toContain('[SetUp "1"]');
+    expect(pgn).toContain(`[FEN "${fen}"]`);
+    expect(pgn).toContain('2... Nf6 3. Nxe5 Nxe5');
+    const p = ok(pgn);
+    expect(p.startFen).toBe(fen);
+    expect(CHESS_REVIEW.replay(p.tokens, p.startFen).ucis).toEqual(moves);
+  });
+
   it('báo nước không hợp lệ đầu tiên', () => {
     const r = CHESS_REVIEW.replay(['e4', 'e5', 'Ke3']);
     expect(r.error).toEqual({ index: 2, token: 'Ke3' });

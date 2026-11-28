@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { CaretLeft, CaretRight, Play as PlayIcon } from '@phosphor-icons/react';
+import { CaretLeft, CaretRight, ChartLineUp, Play as PlayIcon } from '@phosphor-icons/react';
 import { Board, BoardArrow } from '../components/Board';
 import { BotStep, ClassSymbol, EvalBar, MoveList, MoveMark, RichText, San, StartBar, WinBar } from '../components/common';
 import { BOTS, BotProfile } from '../engine/bots';
@@ -12,11 +12,14 @@ import { deepHintAnalysis, explainHint, HintDeep } from '../engine/hint';
 import { isCaptureAt } from '../engine/purpose';
 import { isBookMove, openingNameAt, pickBookMove } from '../engine/book';
 import { PIECE_SVG } from '../assets/pieces';
-import { useStored, BotStats } from '../lib/storage';
+import { load, useStored, BotStats } from '../lib/storage';
 import { playMoveSound, sounds } from '../lib/sound';
 import { navigate } from '../lib/router';
 import { CHESS_KIT } from '../online/chessKit';
 import { LocalGame, LocalSetupScreen, OpponentSwitch, type LocalStart, type Opponent } from '../online/LocalPlay';
+import { SheetActions } from '../online/OnlinePages';
+import { openAnalysis, practiceGame, rememberGame } from '../analysis/history';
+import type { EndReason } from '../online/protocol';
 
 interface CoachSettings {
   evalBar: boolean;
@@ -696,6 +699,27 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
   const summary = useMemo(() => summarize(reviews.filter(Boolean) as MoveReview[], playerColor), [reviews, playerColor]);
   const pendingReviews = reviews.slice(base).some((r) => !r);
 
+  // ---- biên bản ván vừa xong: lưu vào "Ván đã chơi", tải về hoặc mở trang phân tích (chấm cả hai bên) ----
+  const sheet = useMemo(() => {
+    if (!ended || moves.length <= base) return null;
+    const me = load<string>('online-name', '').trim() || 'Người chơi';
+    const machine = `${bot.name} (máy cấp ${bot.level})`;
+    return practiceGame(CHESS_KIT, {
+      source: 'bot',
+      startedAt: setup.id,
+      players: playerColor === 0 ? [me, machine] : [machine, me],
+      you: playerColor,
+      end: { result: ended.result, reason: (ended.reason === 'agreed' ? 'agreement' : ended.reason) as EndReason },
+      ucis: moves,
+      sans: game.sans,
+      startFen: setup.startFen !== START_FEN ? setup.startFen : undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ended, moves, game]);
+  useEffect(() => {
+    if (sheet) rememberGame(sheet);
+  }, [sheet]);
+
   return (
     <div>
       <div className="play">
@@ -913,6 +937,7 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
                 ))}
               </div>
             )}
+            {sheet && <SheetActions kit={CHESS_KIT} sheet={sheet} onToast={setToast} />}
             {viewing && (
               <div className="step-controls" style={{ marginTop: 8 }}>
                 <button className="btn small" disabled={shownPly <= 0} onClick={() => setViewPly(Math.max(0, shownPly - 1))} title="Nước trước" aria-label="Nước trước">
@@ -941,6 +966,7 @@ function GameScreen({ setup, onNew, onRestart }: { setup: GameSetup; onNew: () =
           }}
           onRematch={() => onRestart({ ...setup, playerColor: setup.playerColor === 'w' ? 'b' : 'w' })}
           onNew={onNew}
+          onAnalyze={sheet ? () => openAnalysis(sheet) : undefined}
           onHarder={setup.level < 6 ? () => onRestart({ ...setup, level: setup.level + 1 }) : undefined}
         />
       )}
@@ -1068,6 +1094,7 @@ function GameOverModal({
   onReview,
   onRematch,
   onNew,
+  onAnalyze,
   onHarder,
 }: {
   ended: EndInfo;
@@ -1079,6 +1106,8 @@ function GameOverModal({
   onReview: (i: number) => void;
   onRematch: () => void;
   onNew: () => void;
+  /** Mở trang phân tích ván (có khi đã có biên bản) */
+  onAnalyze?: () => void;
   onHarder?: () => void;
 }) {
   const outcome = ended.result === '1/2-1/2' ? 'draw' : (ended.result === '1-0') === (playerColor === 0) ? 'win' : 'loss';
@@ -1149,6 +1178,12 @@ function GameOverModal({
           <button className="btn" onClick={onClose}>
             🔍 Xem lại ván
           </button>
+          {onAnalyze && (
+            <button className="btn" onClick={onAnalyze}>
+              <ChartLineUp size={16} weight="bold" aria-hidden="true" />
+              Phân tích ván
+            </button>
+          )}
           <button className="btn" onClick={onRematch}>
             🔁 Đấu lại (đổi màu)
           </button>

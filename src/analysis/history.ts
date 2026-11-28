@@ -3,7 +3,7 @@ import { load, save, useStored } from '../lib/storage';
 import { navigate } from '../lib/router';
 import type { AnalysisResult } from '../engine/protocol';
 import type { OnlineKit } from '../online/kit';
-import type { PublicRoom, Side, Variant } from '../online/protocol';
+import type { EndReason, PublicRoom, Result, Side, TimeControl, Variant } from '../online/protocol';
 import { formatSheet, hashText, type SheetResult } from './sheet';
 
 /** Một ván có thể phân tích: biên bản PGN kèm vài thông tin để hiển thị trong danh sách */
@@ -17,8 +17,8 @@ export interface SavedGame {
   you: Side | null;
   plies: number;
   savedAt: number;
-  /** online: phòng "Chơi với bạn"; local: hai người chơi trên một máy (trang Luyện tập); import: nhập biên bản */
-  source: 'online' | 'local' | 'import';
+  /** online: phòng "Chơi với bạn"; bot, local: trang Luyện tập (đấu với máy, đấu hai người trên một máy); import: nhập biên bản */
+  source: 'online' | 'bot' | 'local' | 'import';
   /** Mã phòng của ván chơi với bạn (ván lưu trước khi có trường này: lấy từ `id`) */
   room?: string;
 }
@@ -96,6 +96,51 @@ export function roomGame(kit: OnlineKit, room: PublicRoom, you: Side | null, lin
     savedAt: Date.now(),
     source: 'online',
     room: room.code,
+  };
+}
+
+/** Biên bản một ván chơi ngay trên trình duyệt này, ở trang Luyện tập: đấu với máy (bot) hoặc đấu hai người (local) */
+export function practiceGame(
+  kit: Pick<OnlineKit, 'variant' | 'title' | 'reasons' | 'sideNames'>,
+  g: {
+    source: 'bot' | 'local';
+    /** Lúc bắt đầu ván (Date.now()): ngày trong biên bản và mã của ván trong "Ván đã chơi" */
+    startedAt: number;
+    players: [string, string];
+    you: Side | null;
+    end: { result: Result; reason: EndReason };
+    ucis: string[];
+    sans: string[];
+    /** Thế cờ bắt đầu nếu không phải thế cờ ban đầu */
+    startFen?: string;
+    time?: TimeControl | null;
+    clockLog?: number[];
+  },
+): SavedGame {
+  const pgn = formatSheet({
+    variant: kit.variant,
+    event: g.source === 'bot' ? `Kỳ Đạo – Luyện tập ${kit.title} với máy` : `Kỳ Đạo – Hai người chơi ${kit.title} trên một máy`,
+    players: g.players,
+    result: g.end.result,
+    reason: g.end.reason,
+    reasonText: endDetail(g.end, kit),
+    time: g.time ?? null,
+    date: new Date(g.startedAt),
+    startFen: g.startFen,
+    ucis: g.ucis,
+    sans: g.sans,
+    clockLog: g.clockLog,
+  });
+  return {
+    id: `${g.source}-${kit.variant}-${g.startedAt}`,
+    variant: kit.variant,
+    pgn,
+    players: g.players,
+    result: g.end.result,
+    you: g.you,
+    plies: g.ucis.length,
+    savedAt: Date.now(),
+    source: g.source,
   };
 }
 

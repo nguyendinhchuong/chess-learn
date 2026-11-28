@@ -160,6 +160,27 @@ test('luyện tập: đi một nước, máy đáp lại, thầy nhận xét', a
   await expectNoHorizontalOverflow(page);
 });
 
+test('luyện tập với máy: xin thua, ván được lưu kèm biên bản và mở được ở trang phân tích', async ({ page }) => {
+  const errors = trackErrors(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/#/luyen-tap');
+  await page.locator('.bot-card').first().click();
+  await page.locator('.choice', { hasText: 'Trắng' }).click();
+  await page.getByRole('button', { name: /Bắt đầu ván đấu/ }).click();
+  await clickSquare(page, 'e2');
+  await clickSquare(page, 'e4');
+  await expect(page.locator('.movelist .mv:not(.empty)')).toHaveCount(2, { timeout: 20_000 });
+  await page.getByRole('button', { name: /Xin thua/ }).click();
+  const modal = page.locator('.modal');
+  await expect(modal).toContainText('xin thua');
+  // khung biên bản có nút tải và chép biên bản
+  await expect(page.locator('.coach-panel .sheet-actions')).toContainText('Tải biên bản');
+  await modal.getByRole('button', { name: 'Phân tích ván' }).click();
+  await expect(page).toHaveURL(/#\/phong\/phan-tich$/);
+  await expect(page.locator('main h1')).toContainText('Gà Con');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test('luyện tập – đấu hai người: bàn cờ xoay theo lượt, chiếu hết rồi phân tích ván', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto('/#/luyen-tap');

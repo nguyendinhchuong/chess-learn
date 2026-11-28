@@ -194,6 +194,24 @@ test('cờ tướng – luyện tập: đi Pháo đầu, máy đáp lại, thầ
   await expectNoHorizontalOverflow(page);
 });
 
+test('cờ tướng – luyện tập với máy: xin thua rồi mở trang phân tích', async ({ page }) => {
+  const errors = trackErrors(page);
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/#/co-tuong/luyen-tap');
+  await page.locator('.bot-card').first().click();
+  await page.locator('.choice', { hasText: 'Đỏ' }).click();
+  await page.getByRole('button', { name: /Bắt đầu ván đấu/ }).click();
+  await playMove(page, '.play', 'h2e2');
+  await expect(page.locator('.movelist .mv:not(.empty)')).toHaveCount(2, { timeout: 20_000 });
+  await page.getByRole('button', { name: /Xin thua/ }).click();
+  const modal = page.locator('.modal');
+  await expect(page.locator('.coach-panel .sheet-actions')).toContainText('Tải biên bản');
+  await modal.getByRole('button', { name: 'Phân tích ván' }).click();
+  await expect(page).toHaveURL(/#\/co-tuong\/phong\/phan-tich$/);
+  await expect(page.locator('main h1')).toContainText('máy cấp 1');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test('cờ tướng – đấu hai người: bàn xoay theo lượt, tải lại trang chơi tiếp, đi lại', async ({ page }) => {
   const errors = trackErrors(page);
   const moves = page.locator('.movelist .mv:not(.empty)');
